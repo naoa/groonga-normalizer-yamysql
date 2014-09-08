@@ -1,0 +1,3 @@
+register normalizers/yamysql
+
+normalize NormalizerYaMySQLUnicodeCI "aﾞあﾞz" WITH_CHECKS|WITH_TYPES

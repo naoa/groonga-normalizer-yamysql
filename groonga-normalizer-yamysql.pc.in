@@ -1,0 +1,5 @@
+plugin_name=normalizers/yamysql
+
+Name: groonga-normalizer-yamysql
+Description: Yet another MySQL normalizer plugin for Groonga
+Version: @VERSION@
