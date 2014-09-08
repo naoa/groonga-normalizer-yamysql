@@ -7,7 +7,7 @@
 register normalizers/yamysql
 ```
 
-## 基本ルール
+## Normalizer
 
 ### ``NormalizerYaMySQLUnicodeCI``
 
