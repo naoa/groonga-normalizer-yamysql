@@ -19,7 +19,7 @@ register normalizers/yamysql
 
 * カタカナをひらがなに正規化せず、カタカナのままにする。
 
-### ``ExepectKanaWithVoicedSoudMark``
+### ``ExpectKanaWithVoicedSoundMark``
 
 * 濁音カタカナひらがなを正規化せず、濁音付のままにする。
 
