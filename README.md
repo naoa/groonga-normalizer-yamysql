@@ -61,13 +61,14 @@ register normalizers/yamysql
 
 ### ``VariantKanji``
 
-* 常用漢字、数字漢字、人名用漢字の異体字を正規化する。
+* 常用漢字、数字漢字、人名用漢字、戸籍用漢字の異体字を正規化する。
 
 https://github.com/cjkvi/cjkvi-variants/blob/master/joyo-variants.txt  
 https://github.com/cjkvi/cjkvi-variants/blob/master/numeric-variants.txt  
-https://github.com/cjkvi/cjkvi-variants/blob/master/jinmei-variants.txt  
+https://github.com/cjkvi/cjkvi-variants/blob/master/jinmei-variants.txt   
+https://github.com/cjkvi/cjkvi-variants/blob/master/koseki-variants.txt  
 
-### ``VariantKatakana``
+### ``VariantKata``
 
 * 以下のカタカナの異体字を正規化する。
 
@@ -77,17 +78,13 @@ https://github.com/cjkvi/cjkvi-variants/blob/master/jinmei-variants.txt
 ヱ/エ  
 ヰ/イ
 
-### ``VariantHiragana``
+### ``VariantHira``
 
-* 下のひらがなの異体字を正規化する。
+* 以下のひらがなの異体字を正規化する。
 
 ぢ/じ づ/ず  
 ゑ/え  
 ゐ/い
-
-### ``PreFilterHtml``
-
-* HTMLタグを除去する。
 
 ### ``PreFilterHtml``
 
