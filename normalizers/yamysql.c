@@ -478,6 +478,8 @@ normalize(grn_ctx *ctx, grn_obj *string,
 #define KATAKANA_HA_LINE_PA_OFFSET 2
 #define KATAKANA_HA_LINE_GAP       3
 
+#define HALFWIDTH_KATAKANA_DI_DU_OFFSET 5
+
 #define FULLWIDTH_KATAKANA_LETTER_VU 0x30f4
 #define FULLWIDTH_KATAKANA_LETTER_BA 0x30d0
 #define FULLWIDTH_KATAKANA_LETTER_BI 0x30d3
@@ -561,13 +563,12 @@ normalize_halfwidth_katakana_with_voiced_sound_mark_to_fullwidth(
           if (HALFWIDTH_KATAKANA_LETTER_TU <= unichar &&
               unichar <= HALFWIDTH_KATAKANA_LETTER_TO) {
             if (unichar == HALFWIDTH_KATAKANA_LETTER_TU) {
-              unichar -=5;
+              unichar -= HALFWIDTH_KATAKANA_DI_DU_OFFSET;
             } else {
               small_tu_offset = 1;
             }
-          }
-          if (unichar == HALFWIDTH_KATAKANA_LETTER_TI) {
-            unichar -=5;
+          } else if (unichar == HALFWIDTH_KATAKANA_LETTER_TI) {
+            unichar -= HALFWIDTH_KATAKANA_DI_DU_OFFSET;
           }
           n_bytes = unichar_to_utf8(KATAKANA_LETTER_KA +
                                     KATAKANA_VOICED_SOUND_MARK_OFFSET +
