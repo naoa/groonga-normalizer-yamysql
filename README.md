@@ -41,16 +41,16 @@ register normalizers/yamysql
 
 * ハイフン、ダッシュ、長音記号等を長音記号(0x030fc)に正規化する
 
-    > HYPHEN-MINUS     0x0002d
-    > HYPHEN     0x02010
-    > NON-BREAKING HYPHEN     0x02011
-    > FIGURE DASH     0x02012
-    > EN DASH     0x02013
-    > EM DASH     0x02014
-    > HORIZONTAL BAR     0x02015
-    > HYPHEN BULLET     0x02043
-    > MINUS SIGN     0x02212
-    > KATAKANA-HIRAGANA PROLONGED SOUND MARK     0x030fc
+    > HYPHEN-MINUS     0x0002d  
+    > HYPHEN     0x02010  
+    > NON-BREAKING HYPHEN     0x02011  
+    > FIGURE DASH     0x02012  
+    > EN DASH     0x02013  
+    > EM DASH     0x02014  
+    > HORIZONTAL BAR     0x02015  
+    > HYPHEN BULLET     0x02043  
+    > MINUS SIGN     0x02212  
+    > KATAKANA-HIRAGANA PROLONGED SOUND MARK     0x030fc  
     > HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK     0x0ff70
 
 ### ``VariantKanji``
@@ -74,8 +74,8 @@ http://kanji-database.sourceforge.net/variants/variants.txt
 
 * 以下のひらがなの異体字を正規化する。
 
-ぢ/じ づ/ず
-ゑ/え
+ぢ/じ づ/ず  
+ゑ/え  
 ゐ/い
 
 以下、全て未実装
