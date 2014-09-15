@@ -372,16 +372,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
       grn_bool custom_normalized = GRN_FALSE;
       unsigned int normalized_character_length;
 
-      /* DEBUG LOG */
-/*
-      {
-	uint32_t unichar;
-	unichar = utf8_to_unichar(rest, character_length);
-	GRN_PLUGIN_LOG(ctx, GRN_LOG_DEBUG,"[normalizer][mysqlcustom] input character = <(%c)>.",rest[0]);
-	GRN_PLUGIN_LOG(ctx, GRN_LOG_DEBUG,"[normalizer][mysqlcustom] input character_unicode = <(%06x)>.",unichar);
-      }
-*/
-
       if (custom_normalizer) {
         custom_normalized = custom_normalizer(ctx,
                                               rest,
@@ -401,15 +391,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
                             &normalized_n_characters);
       }
 
-      /* DEBUG LOG */
-/*
-      {
-        uint32_t unichar;
-        unichar = utf8_to_unichar(normalized, character_length);
-        GRN_PLUGIN_LOG(ctx, GRN_LOG_DEBUG,"[normalizer][mysqlcustom] normalized character = <(%c)>.",normalized[0]);
-        GRN_PLUGIN_LOG(ctx, GRN_LOG_DEBUG,"[normalizer][mysqlcustom] normalized character_unicode = <(%06x)>.",unichar);
-      }
-*/
       if (current_type && normalized_character_length > 0) {
         char *current_normalized;
         current_normalized =
@@ -497,6 +478,18 @@ normalize(grn_ctx *ctx, grn_obj *string,
 #define KATAKANA_HA_LINE_PA_OFFSET 2
 #define KATAKANA_HA_LINE_GAP       3
 
+#define FULLWIDTH_KATAKANA_LETTER_VU 0x30f4
+#define FULLWIDTH_KATAKANA_LETTER_BA 0x30d0
+#define FULLWIDTH_KATAKANA_LETTER_BI 0x30d3
+#define FULLWIDTH_KATAKANA_LETTER_BU 0x30d6
+#define FULLWIDTH_KATAKANA_LETTER_BE 0x30d9
+#define FULLWIDTH_KATAKANA_LETTER_BO 0x30dc
+#define FULLWIDTH_KATAKANA_LETTER_SMALL_A 0x30a1
+#define FULLWIDTH_KATAKANA_LETTER_SMALL_I 0x30a3
+#define FULLWIDTH_KATAKANA_LETTER_SMALL_U 0x30a5
+#define FULLWIDTH_KATAKANA_LETTER_SMALL_E 0x30a7
+#define FULLWIDTH_KATAKANA_LETTER_SMALL_O 0x30a9
+
 static grn_bool
 normalize_halfwidth_katakana_with_voiced_sound_mark_to_fullwidth(
   grn_ctx *ctx,
@@ -513,6 +506,7 @@ normalize_halfwidth_katakana_with_voiced_sound_mark_to_fullwidth(
   grn_bool is_voiced_sound_markable_halfwidth_katakana = GRN_FALSE;
   grn_bool is_semi_voiced_sound_markable_halfwidth_katakana = GRN_FALSE;
   grn_bool is_ha_line = GRN_FALSE;
+  grn_bool is_vu = GRN_FALSE;
   uint32_t unichar;
 
   if (*character_length != 3) {
@@ -531,10 +525,13 @@ normalize_halfwidth_katakana_with_voiced_sound_mark_to_fullwidth(
     is_voiced_sound_markable_halfwidth_katakana = GRN_TRUE;
     is_semi_voiced_sound_markable_halfwidth_katakana = GRN_TRUE;
     is_ha_line = GRN_TRUE;
+  } else if (unichar == FULLWIDTH_KATAKANA_LETTER_VU) {
+    is_vu = GRN_TRUE;
   }
 
   if (!is_voiced_sound_markable_halfwidth_katakana &&
-      !is_semi_voiced_sound_markable_halfwidth_katakana) {
+      !is_semi_voiced_sound_markable_halfwidth_katakana &&
+      !is_vu) {
     return GRN_FALSE;
   }
 
@@ -563,7 +560,14 @@ normalize_halfwidth_katakana_with_voiced_sound_mark_to_fullwidth(
           int small_tu_offset = 0;
           if (HALFWIDTH_KATAKANA_LETTER_TU <= unichar &&
               unichar <= HALFWIDTH_KATAKANA_LETTER_TO) {
-            small_tu_offset = 1;
+            if (unichar == HALFWIDTH_KATAKANA_LETTER_TU) {
+              unichar -=5;
+            } else {
+              small_tu_offset = 1;
+            }
+          }
+          if (unichar == HALFWIDTH_KATAKANA_LETTER_TI) {
+            unichar -=5;
           }
           n_bytes = unichar_to_utf8(KATAKANA_LETTER_KA +
                                     KATAKANA_VOICED_SOUND_MARK_OFFSET +
@@ -586,6 +590,50 @@ normalize_halfwidth_katakana_with_voiced_sound_mark_to_fullwidth(
                                   ((unichar - HALFWIDTH_KATAKANA_LETTER_HA) *
                                    KATAKANA_HA_LINE_GAP),
                                   normalized + *normalized_length_in_bytes);
+        *character_length += next_character_length;
+        *normalized_character_length = n_bytes;
+        *normalized_length_in_bytes += n_bytes;
+        (*normalized_n_characters)++;
+        custom_normalized = GRN_TRUE;
+      }
+    } else if (next_unichar == FULLWIDTH_KATAKANA_LETTER_SMALL_A) {
+      if (is_vu) {
+        unsigned int n_bytes;
+        n_bytes = unichar_to_utf8(FULLWIDTH_KATAKANA_LETTER_BA,
+                                 normalized + *normalized_length_in_bytes);
+        *character_length += next_character_length;
+        *normalized_character_length = n_bytes;
+        *normalized_length_in_bytes += n_bytes;
+        (*normalized_n_characters)++;
+        custom_normalized = GRN_TRUE;
+      }
+    } else if (next_unichar == FULLWIDTH_KATAKANA_LETTER_SMALL_I) {
+      if (is_vu) {
+        unsigned int n_bytes;
+        n_bytes = unichar_to_utf8(FULLWIDTH_KATAKANA_LETTER_BI,
+                                 normalized + *normalized_length_in_bytes);
+        *character_length += next_character_length;
+        *normalized_character_length = n_bytes;
+        *normalized_length_in_bytes += n_bytes;
+        (*normalized_n_characters)++;
+        custom_normalized = GRN_TRUE;
+      }
+    } else if (next_unichar == FULLWIDTH_KATAKANA_LETTER_SMALL_E) {
+      if (is_vu) {
+        unsigned int n_bytes;
+        n_bytes = unichar_to_utf8(FULLWIDTH_KATAKANA_LETTER_BE,
+                                 normalized + *normalized_length_in_bytes);
+        *character_length += next_character_length;
+        *normalized_character_length = n_bytes;
+        *normalized_length_in_bytes += n_bytes;
+        (*normalized_n_characters)++;
+        custom_normalized = GRN_TRUE;
+      }
+    } else if (next_unichar == FULLWIDTH_KATAKANA_LETTER_SMALL_O) {
+      if (is_vu) {
+        unsigned int n_bytes;
+        n_bytes = unichar_to_utf8(FULLWIDTH_KATAKANA_LETTER_BO,
+                                 normalized + *normalized_length_in_bytes);
         *character_length += next_character_length;
         *normalized_character_length = n_bytes;
         *normalized_length_in_bytes += n_bytes;

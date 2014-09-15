@@ -13,7 +13,7 @@ register normalizers/yamysql
 
 原則、``NormalizerMySQLUnicodeCI``の正規化ルールで文字列が正規化されます。
 
-``yamysql_register``コマンドを使うことにより、以下のルールを任意に組み合わせたノーマライザーを追加することができます。
+``yamysql_register``コマンドを使うことにより、以下のルールを任意に組み合わせたノーマライザーを追加することができます(未実装。検討中)。
 
 ### ``ExpectKata``
 
@@ -41,32 +41,24 @@ register normalizers/yamysql
 
 * ハイフン、ダッシュ、長音記号等を長音記号(0x030fc)に正規化する
 
-    > Hyphen-minus     0x0002d  
-    > Hyphen     0x02010  
-    > Non-breaking Hyphen     0x02011  
-    > Figure Dash     0x02012  
-    > En Dash     0x02013  
-    > Em Dash     0x02014  
-    > Horizontal Bar     0x02015  
-    > Hyphen Bullet     0x02043  
-    > Minus Sign     0x02212  
-    > Katakana-Hiragana Prolonged Sound Mark     0x030fc  
-    > Halfwidth Katakana-hiragana Prolonged Sound Mark     0x0FF70
-
-以下、全て未実装
-
-### ``ExceptKanaCI``
-
-* ひらがなカタカナ小文字は大文字に正規化しない。
+    > HYPHEN-MINUS     0x0002d
+    > HYPHEN     0x02010
+    > NON-BREAKING HYPHEN     0x02011
+    > FIGURE DASH     0x02012
+    > EN DASH     0x02013
+    > EM DASH     0x02014
+    > HORIZONTAL BAR     0x02015
+    > HYPHEN BULLET     0x02043
+    > MINUS SIGN     0x02212
+    > KATAKANA-HIRAGANA PROLONGED SOUND MARK     0x030fc
+    > HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK     0x0ff70
 
 ### ``VariantKanji``
 
-* 常用漢字、数字漢字、人名用漢字、戸籍用漢字の異体字を正規化する。
+* 以下の漢字の異体字を正規化する(0x0fffffまでのみ)。
 
-https://github.com/cjkvi/cjkvi-variants/blob/master/joyo-variants.txt  
-https://github.com/cjkvi/cjkvi-variants/blob/master/numeric-variants.txt  
-https://github.com/cjkvi/cjkvi-variants/blob/master/jinmei-variants.txt   
-https://github.com/cjkvi/cjkvi-variants/blob/master/koseki-variants.txt  
+http://kanji-database.sourceforge.net/variants/search.html  
+http://kanji-database.sourceforge.net/variants/variants.txt
 
 ### ``VariantKata``
 
@@ -82,9 +74,15 @@ https://github.com/cjkvi/cjkvi-variants/blob/master/koseki-variants.txt
 
 * 以下のひらがなの異体字を正規化する。
 
-ぢ/じ づ/ず  
-ゑ/え  
+ぢ/じ づ/ず
+ゑ/え
 ゐ/い
+
+以下、全て未実装
+
+### ``ExceptKanaCI``
+
+* ひらがなカタカナ小文字は大文字に正規化しない。
 
 ### ``PreFilterHtml``
 
