@@ -1,0 +1,4 @@
+register normalizers/yamysql
+
+normalize NormalizerYaMySQL "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをん"
+

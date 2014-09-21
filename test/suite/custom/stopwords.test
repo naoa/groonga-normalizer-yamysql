@@ -1,0 +1,9 @@
+register normalizers/yamysql
+
+table_create @yamysql_stopwords TABLE_HASH_KEY ShortText
+load --table @yamysql_stopwords
+[
+{"_key": "テスト"}
+]
+normalize NormalizerYaMySQL "これはテストです。" WITH_TYPES|WITH_CHECKS
+

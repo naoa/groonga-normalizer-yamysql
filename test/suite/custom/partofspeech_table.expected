@@ -1,0 +1,40 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+table_create @yamysql_partofspeech TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table @yamysql_partofspeech
+[
+{"_key": "名詞"}
+]
+[[0,0.0,0.0],1]
+normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "はです。",
+    "types": [
+      "unknown",
+      "hiragana",
+      "hiragana",
+      "symbol"
+    ],
+    "checks": [
+      9,
+      0,
+      0,
+      12,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]

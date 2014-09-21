@@ -1,6 +1,6 @@
 register normalizers/yamysql
 
-normalize NormalizerYaMySQLUnicodeCI "\
+normalize NormalizerYaMySQL "\
 高髙\
 崎﨑\
 亜亞\

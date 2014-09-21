@@ -1,0 +1,4 @@
+register normalizers/yamysql
+
+normalize NormalizerYaMySQLSymbolPartofspeechHtmlProlong "**これは<b>テスト</b>データーです。" WITH_TYPES|WITH_CHECKS
+

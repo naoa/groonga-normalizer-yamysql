@@ -1,0 +1,4 @@
+register normalizers/yamysql
+
+normalize NormalizerYaMySQLPartofspeechProlong "これはテストデーターです。" WITH_TYPES|WITH_CHECKS
+

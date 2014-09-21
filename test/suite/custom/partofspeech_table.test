@@ -1,0 +1,9 @@
+register normalizers/yamysql
+
+table_create @yamysql_partofspeech TABLE_HASH_KEY ShortText
+load --table @yamysql_partofspeech
+[
+{"_key": "名詞"}
+]
+normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES|WITH_CHECKS
+

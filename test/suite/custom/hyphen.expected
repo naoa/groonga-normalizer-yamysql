@@ -1,0 +1,4 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+normalize NormalizerYaMySQL "-‐--–—―⁃−ーｰ"
+[[0,0.0,0.0],{"normalized":"-----------","types":[],"checks":[]}]

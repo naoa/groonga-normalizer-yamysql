@@ -1,0 +1,48 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+table_create @yamysql_stopwords TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table @yamysql_stopwords
+[
+{"_key": "テスト"}
+]
+[[0,0.0,0.0],1]
+normalize NormalizerYaMySQL "これはテストです。" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "これはです。",
+    "types": [
+      "hiragana",
+      "hiragana",
+      "unknown",
+      "hiragana",
+      "hiragana",
+      "symbol"
+    ],
+    "checks": [
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      12,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]

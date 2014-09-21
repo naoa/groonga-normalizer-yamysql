@@ -1,4 +1,0 @@
-register normalizers/yamysql
-
-normalize NormalizerYaMySQLUnicodeCI "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをん"
-

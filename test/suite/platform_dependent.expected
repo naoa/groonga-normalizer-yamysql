@@ -1,4 +1,0 @@
-register normalizers/yamysql
-[[0,0.0,0.0],true]
-normalize NormalizerYaMySQLUnicodeCI "−—〜‖"
-[[0,0.0,0.0],{"normalized":"ーー~|","types":[],"checks":[]}]

@@ -1,0 +1,37 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "これテスト",
+    "types": [
+      "hiragana",
+      "unknown",
+      "katakana",
+      "katakana",
+      "unknown"
+    ],
+    "checks": [
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      6,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]

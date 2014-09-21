@@ -1,0 +1,53 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+normalize NormalizerYaMySQLHtml "<p>これは<b>テスト</b>です。</p>" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "これはテストです。",
+    "types": [
+      "hiragana",
+      "hiragana",
+      "unknown",
+      "katakana",
+      "katakana",
+      "unknown",
+      "hiragana",
+      "hiragana",
+      "unknown"
+    ],
+    "checks": [
+      6,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      6,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      7,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]

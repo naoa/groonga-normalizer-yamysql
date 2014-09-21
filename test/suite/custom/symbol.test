@@ -1,0 +1,4 @@
+register normalizers/yamysql
+
+normalize NormalizerYaMySQLSymbol "<p>これは<b>テスト</b>です。</p>" WITH_TYPES|WITH_CHECKS
+

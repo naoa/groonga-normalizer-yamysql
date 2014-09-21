@@ -1,0 +1,47 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+normalize NormalizerYaMySQLSymbolPartofspeechHtmlProlong "**これは<b>テスト</b>データーです。" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "これテストデ-タ",
+    "types": [
+      "hiragana",
+      "unknown",
+      "katakana",
+      "katakana",
+      "unknown",
+      "katakana",
+      "symbol",
+      "unknown"
+    ],
+    "checks": [
+      5,
+      0,
+      0,
+      3,
+      0,
+      0,
+      9,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      7,
+      0,
+      0,
+      3,
+      3,
+      0,
+      0
+    ]
+  }
+]
