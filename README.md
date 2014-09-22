@@ -73,7 +73,7 @@ normalize NormalizerYaMySQL "フィルム"
 
 ### ``Hyphen``
 
-* ハイフン、ダッシュ、長音記号等を長音記号(0x030fc)に正規化します。
+* ハイフン、ダッシュ、長音記号等を長音記号(0x030fc)に正規化します。マイナスは正規化しません。
 
     > HYPHEN     0x02010  
     > NON-BREAKING HYPHEN     0x02011  
@@ -146,7 +146,7 @@ normalize NormalizerYaMySQL "おっづ"
 
 ### ``KanaCI``
 
-* ひらがなカタカナ小文字は大文字に正規化する。
+* ひらがなカタカナ小文字を大文字に正規化します。
 
 ```
 > normalize NormalizerYaMySQLKanaCI "フィルム"
@@ -175,7 +175,7 @@ normalize NormalizerYaMySQLSymbol "It's test data!"
 
 ### ``Partofspeech``
 
-* Mecabで分かち書きをし、所定の品詞をします。
+* Mecabで分かち書きをし、所定の品詞を除去します。
 
 デフォルトでは、以下の品詞が除去されます。
 
