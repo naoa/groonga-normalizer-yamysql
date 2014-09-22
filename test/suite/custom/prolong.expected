@@ -8,7 +8,7 @@ normalize NormalizerYaMySQLPartofspeechProlong "これはテストデーター�
     0.0
   ],
   {
-    "normalized": "これテストデ-タ",
+    "normalized": "これテストデータ",
     "types": [
       "hiragana",
       "unknown",
@@ -16,7 +16,7 @@ normalize NormalizerYaMySQLPartofspeechProlong "これはテストデーター�
       "katakana",
       "katakana",
       "katakana",
-      "symbol",
+      "katakana",
       "unknown"
     ],
     "checks": [
@@ -39,6 +39,8 @@ normalize NormalizerYaMySQLPartofspeechProlong "これはテストデーター�
       0,
       0,
       3,
+      0,
+      0,
       3,
       0,
       0

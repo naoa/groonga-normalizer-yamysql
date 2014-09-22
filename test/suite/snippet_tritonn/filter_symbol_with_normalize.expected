@@ -1,0 +1,48 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+register function/snippet_tritonn
+[[0,0.0,0.0],true]
+table_create Entries TABLE_NO_KEY
+[[0,0.0,0.0],true]
+column_create Entries content COLUMN_SCALAR ShortText
+[[0,0.0,0.0],true]
+table_create Tokens TABLE_PAT_KEY ShortText --default_tokenizer TokenBigramIgnoreBlank --normalizer NormalizerYaMySQLSymbol
+[[0,0.0,0.0],true]
+column_create Tokens entries_content COLUMN_INDEX|WITH_POSITION Entries content
+[[0,0.0,0.0],true]
+load --table Entries
+[
+{"content": "高速データ*ベースだ"}
+]
+[[0,0.0,0.0],1]
+select Entries   --output_columns 'snippet_tritonn(content, 200, 2,   "NormalizerYaMySQLSymbol",   1, 1, "...", "...",   "データベース",  "<span class=\\"w1\\">", "</span>"), content'   --command_version 2   --match_columns 'content'   --query "データベース"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    [
+      [
+        1
+      ],
+      [
+        [
+          "snippet_tritonn",
+          "Bool"
+        ],
+        [
+          "content",
+          "ShortText"
+        ]
+      ],
+      [
+        [
+          "...高速<span class=\"w1\">データ*ベース</span>だ..."
+        ],
+        "高速データ*ベースだ"
+      ]
+    ]
+  ]
+]

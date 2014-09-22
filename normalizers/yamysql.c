@@ -536,6 +536,8 @@ normalize(grn_ctx *ctx, grn_obj *string,
       grn_bool custom_normalized = GRN_FALSE;
       unsigned int normalized_character_length;
 
+      uint32_t unichar;
+      unichar = utf8_to_unichar(rest, character_length);
       if (custom_normalizer) {
         custom_normalized = custom_normalizer(ctx,
                                               rest,
@@ -971,6 +973,7 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         const char *delimiter = ",";
         unsigned int pos_length = 0;
         grn_bool is_removed = GRN_FALSE;
+        grn_bool is_token_removed = GRN_FALSE;
 
         while ((char_length = grn_plugin_charlen(ctx, feature, feature_rest_length, encoding))) {
           if (feature + char_length && !memcmp(feature, delimiter, char_length)) {
@@ -983,10 +986,12 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         if (execute_token_filter(ctx, node->surface, node->length,
                                  node->feature, pos_length,
                                  stopwords_table, pos_table)) {
-          is_removed = GRN_TRUE;
+          is_token_removed = GRN_TRUE;
         } 
 
         while ((char_length = grn_plugin_charlen(ctx, token, rest_length, encoding))) {
+          is_removed = GRN_FALSE;
+
           if (filter_html) {
             switch (token[0]) {
               case '<' :
@@ -1001,11 +1006,15 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
                 break;
             }
           }
-          if (filter_symbol) {
+          if (is_token_removed && !is_removed) {
+            is_removed = GRN_TRUE;
+          }
+          if (filter_symbol && !is_removed) {
             if (grn_nfkc_char_type((unsigned char *)token) == GRN_CHAR_SYMBOL) {
               is_removed = GRN_TRUE;
             }
           }
+          
           if (rest_length - char_length) {
             if (filter_html && in_tag) {
               grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(grn_bool));

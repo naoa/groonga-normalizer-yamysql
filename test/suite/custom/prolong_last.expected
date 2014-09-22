@@ -8,12 +8,12 @@ normalize NormalizerYaMySQL "デ-ター" WITH_TYPES|WITH_CHECKS
     0.0
   ],
   {
-    "normalized": "デ-タ-",
+    "normalized": "デ-ター",
     "types": [
       "katakana",
       "symbol",
       "katakana",
-      "symbol"
+      "katakana"
     ],
     "checks": [
       3,
@@ -23,7 +23,9 @@ normalize NormalizerYaMySQL "デ-ター" WITH_TYPES|WITH_CHECKS
       3,
       0,
       0,
-      3
+      3,
+      0,
+      0
     ]
   }
 ]
