@@ -28,7 +28,7 @@
 * ``NormalizerYaMySQLKanaCISymbolPartofspeechHtmlProlong``
 
 
-### ``NormalizerYaMySQL``
+## Basic
 
 原則、``NormalizerMySQLUnicodeCI``の正規化ルールで文字列が正規化されます。それに加え、以下の機能をカスタマイズしています。ノーマライザー名に含まれていない以下の機能は全て有効になっておりカスタマイズすることはできません。
 
@@ -130,6 +130,8 @@ normalize NormalizerYaMySQL "ヴァイオリン"
 normalize NormalizerYaMySQL "おっづ"
 [[0,1411335627.1483,6.96182250976562e-05],{"normalized":"おっず","types":[],"checks":[]}]
 ```
+
+## Options
 
 以下の機能は、対応する名前が付与されたノーマライザーでのみ有効になります。  
 ストップワードの機能は、あらかじめ所定のテーブルを作成しなければ動作しません。
