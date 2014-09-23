@@ -51,5 +51,5 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/groonga/plugins/*/*.a
 %{_libdir}/pkgconfig/groonga-normalizer-yamysql.pc
 
 %changelog
-* Sun Sep 24 2014 Naoya Murakami <naoya@createfield.com> - 1.0.0-1
+* Wed Sep 24 2014 Naoya Murakami <naoya@createfield.com> - 1.0.0-1
 - initial packaging for Fedora
