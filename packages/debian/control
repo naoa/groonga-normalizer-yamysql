@@ -14,7 +14,7 @@ Architecture: any
 Depends:
   ${misc:Depends},
   ${shlibs:Depends},
-  libgroonga-dev (>= 4.0.5)
+  libgroonga-dev (>= 3.0.3)
 Description: Yet another MySQL normalizer plugin for Groonga
  This package provides yet another MySQL normalizer plugin.
 

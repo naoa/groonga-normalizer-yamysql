@@ -11,8 +11,8 @@ URL:		http://github.com/naoa/groonga-normalizer-yamysql
 Source0:	http://packages.createfield.com/source/%{name}/%{name}-%{version}.tar.gz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
-BuildRequires:	groonga-devel >= 4.0.5
-Requires:	groonga-libs >= 4.0.5
+BuildRequires:	groonga-devel >= 3.0.3
+Requires:	groonga-libs >= 3.0.3
 
 %description
 This package provides yet another MySQL normalizer plugin.
@@ -52,5 +52,5 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/groonga/plugins/*/*.a
 %{_libdir}/pkgconfig/groonga-normalizer-yamysql.pc
 
 %changelog
-* Sun Sep 14 2014 Naoya Murakami <naoya@createfield.com> - 1.0.0-1
+* Sun Sep 24 2014 Naoya Murakami <naoya@createfield.com> - 1.0.0-1
 - initial packaging for CentOS

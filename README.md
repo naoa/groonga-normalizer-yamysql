@@ -237,7 +237,7 @@ Build this normalizer.
 
 ## Dependencies
 
-* Groonga >= 4.0.5
+* Groonga >= 3.0.3
 * MeCab
 
 Install ``mecab``, ``mecab-devel``, ``groonga-devel`` in CentOS/Fedora.

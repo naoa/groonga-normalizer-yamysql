@@ -84,7 +84,7 @@ if test "x$with_mecab" = "xyes"; then
 fi
 AM_CONDITIONAL(WITH_MECAB, test "x$with_mecab" = "xyes")
 
-GROONGA_REQUIRED_VERSION=4.0.5
+GROONGA_REQUIRED_VERSION=3.0.3
 PKG_CHECK_MODULES([GROONGA], [groonga >= ${GROONGA_REQUIRED_VERSION}])
 
 _PKG_CONFIG(GROONGA_PLUGINS_DIR, [variable=pluginsdir],    [groonga])
