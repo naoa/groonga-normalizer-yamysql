@@ -536,8 +536,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
       grn_bool custom_normalized = GRN_FALSE;
       unsigned int normalized_character_length;
 
-      uint32_t unichar;
-      unichar = utf8_to_unichar(rest, character_length);
       if (custom_normalizer) {
         custom_normalized = custom_normalizer(ctx,
                                               rest,
