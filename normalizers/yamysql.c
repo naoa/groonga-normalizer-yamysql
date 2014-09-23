@@ -963,7 +963,7 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
     for (; node; node = node->next) {
       if (node->stat == MECAB_NOR_NODE || node->stat == MECAB_UNK_NODE) {
         unsigned int char_length;
-        unsigned int last_char_length;
+        unsigned int last_char_length = 0;
         char *token = (char *)node->surface;
         unsigned int rest_length = node->length;
         char *feature = (char *)node->feature;
