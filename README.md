@@ -304,7 +304,7 @@ Build this normalizer.
 * MeCab
 
 Install ``mecab``, ``mecab-devel``, ``groonga-devel`` in CentOS/Fedora.
-Install ``mecab``, ``libmecab-dev``, ``libgroonga-dev`` in Debian/Ubutu.  
+Install ``mecab``, ``libmecab-dev``, ``libgroonga-dev`` in Debian/Ubuntu.  
 
 See http://groonga.org/docs/install.html
 
