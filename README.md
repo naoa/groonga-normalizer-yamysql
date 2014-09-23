@@ -226,6 +226,69 @@ normalize NormalizerYaMySQLPartofspeechProlong "データー"
 
 ## Install
 
+Install ``groonga-normalizer-yamysql`` package:
+
+### CentOS
+
+* CentOS6
+
+```
+% sudo yum localinstall -y http://packages.createfield.com/centos/6/groonga-normalizer-yamysql-1.0.0-1.el6.x86_64.rpm
+```
+
+* CentOS7
+
+```
+% sudo yum localinstall -y http://packages.createfield.com/centos/7/groonga-normalizer-yamysql-1.0.0-1.el7.centos.x86_64.rpm
+```
+
+### Fedora
+
+* Fedora 20
+
+```
+% sudo yum localinstall -y http://packages.createfield.com/fedora/20/groonga-normalizer-yamysql-1.0.0-1.fc20.x86
+_64.rpm
+```
+
+* Fedora 21
+
+```
+% sudo yum localinstall -y http://packages.createfield.com/fedora/21/groonga-normalizer-yamysql-1.0.0-1.fc21.x86_64.rpm
+```
+
+### Debian GNU/LINUX
+
+* wheezy
+
+```
+% wget http://packages.createfield.com/debian/wheezy/groonga-normalizer-yamysql_1.0.0-1_amd64.deb
+% sudo dpkg -i groonga-normalizer-yamysql_1.0.0-1_amd64.deb
+```
+
+* jessie
+
+```
+% wget http://packages.createfield.com/debian/jessie/groonga-normalizer-yamysql_1.0.0-1_amd64.deb
+% sudo dpkg -i groonga-normalizer-yamysql_1.0.0-1_amd64.deb
+```
+
+### Ubuntu
+
+* precise
+
+```
+% wget http://packages.createfield.com/ubuntu/precise/groonga-normalizer-yamysql_1.0.0-1_amd64.deb
+% sudo dpkg -i groonga-normalizer-yamysql_1.0.0-1_amd64.deb
+```
+
+* trusty
+
+```
+% wget http://packages.createfield.com/ubuntu/trusty/groonga-normalizer-yamysql_1.0.0-1_amd64.deb
+% sudo dpkg -i groonga-normalizer-yamysql_1.0.0-1_amd64.deb
+```
+
 ### Source install
 
 Build this normalizer.
