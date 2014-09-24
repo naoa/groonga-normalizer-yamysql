@@ -78,6 +78,8 @@ static grn_encoding sole_mecab_encoding = GRN_ENC_NONE;
 #define PARTOFSPEECH_TABLE_NAME "@yamysql_partofspeech"
 #define PARTOFSPEECH_TABLE_NAME_MRN "@0040yamysql_partofspeech"
 
+grn_obj *default_pos_table = NULL;
+
 static grn_encoding
 translate_mecab_charset_to_grn_encoding(const char *charset)
 {
@@ -1105,38 +1107,29 @@ mysql_unicode_ci_custom_next(
   grn_bulk_space(ctx, &remove_checks, original_length_in_bytes);
   GRN_BULK_REWIND(&remove_checks);
 
-  stopwords_table = grn_ctx_get(ctx,
-                                STOPWORDS_TABLE_NAME,
-                                strlen(STOPWORDS_TABLE_NAME));
-  if (!stopwords_table) {
+  if (flags) {
     stopwords_table = grn_ctx_get(ctx,
-                                  STOPWORDS_TABLE_NAME_MRN,
-                                  strlen(STOPWORDS_TABLE_NAME_MRN));
+                                  STOPWORDS_TABLE_NAME,
+                                  strlen(STOPWORDS_TABLE_NAME));
+    if (!stopwords_table) {
+      stopwords_table = grn_ctx_get(ctx,
+                                    STOPWORDS_TABLE_NAME_MRN,
+                                    strlen(STOPWORDS_TABLE_NAME_MRN));
+    }
   }
   
-  if (filter_pos) {
-    pos_table = grn_ctx_get(ctx,
-                            PARTOFSPEECH_TABLE_NAME,
-                            strlen(PARTOFSPEECH_TABLE_NAME));
-    if (!pos_table) {
+  if (flags) {
+    if (filter_pos) {
       pos_table = grn_ctx_get(ctx,
-                              PARTOFSPEECH_TABLE_NAME_MRN,
-                              strlen(PARTOFSPEECH_TABLE_NAME_MRN));
-    }
-    if (!pos_table) {
-      grn_obj *key_type;
-      key_type = grn_ctx_at(ctx, GRN_DB_SHORT_TEXT);
-      pos_table = grn_table_create(ctx, NULL, 0, NULL,
-                                   GRN_OBJ_TABLE_HASH_KEY,
-                                   key_type, NULL);
-      if (pos_table) {
-        grn_table_add(ctx, pos_table, "助詞", strlen("助詞"), NULL);
-        grn_table_add(ctx, pos_table, "助動詞", strlen("助動詞"), NULL);
-        grn_table_add(ctx, pos_table, "記号", strlen("記号"), NULL);
-        grn_table_add(ctx, pos_table, "補助記号", strlen("補助記号"), NULL);
-        grn_table_add(ctx, pos_table, "連体詞", strlen("連体詞"), NULL);
-        grn_table_add(ctx, pos_table, "感動詞", strlen("感動詞"), NULL);
-        grn_table_add(ctx, pos_table, "接続詞", strlen("接続詞"), NULL);
+                              PARTOFSPEECH_TABLE_NAME,
+                              strlen(PARTOFSPEECH_TABLE_NAME));
+      if (!pos_table) {
+        pos_table = grn_ctx_get(ctx,
+                                PARTOFSPEECH_TABLE_NAME_MRN,
+                                strlen(PARTOFSPEECH_TABLE_NAME_MRN));
+      }
+      if (!pos_table) {
+        pos_table = default_pos_table;
       }
     }
   }
@@ -1168,6 +1161,12 @@ mysql_unicode_ci_custom_next(
   }
 
   grn_obj_unlink(ctx, &remove_checks);
+  if (pos_table && pos_table != default_pos_table) {
+    grn_obj_unlink(ctx, pos_table);
+  }
+  if (stopwords_table) {
+    grn_obj_unlink(ctx, stopwords_table);
+  }
   return NULL;
 }
 
@@ -1214,6 +1213,22 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
   }
 
   check_mecab_dictionary_encoding(ctx);
+
+  grn_obj *key_type;
+  key_type = grn_ctx_at(ctx, GRN_DB_SHORT_TEXT);
+  default_pos_table = grn_table_create(ctx, NULL, 0, NULL,
+                                       GRN_OBJ_TABLE_HASH_KEY,
+                                       key_type, NULL);
+  if (default_pos_table) {
+    grn_table_add(ctx, default_pos_table, "助詞", strlen("助詞"), NULL);
+    grn_table_add(ctx, default_pos_table, "助動詞", strlen("助動詞"), NULL);
+    grn_table_add(ctx, default_pos_table, "記号", strlen("記号"), NULL);
+    grn_table_add(ctx, default_pos_table, "補助記号", strlen("補助記号"), NULL);
+    grn_table_add(ctx, default_pos_table, "連体詞", strlen("連体詞"), NULL);
+    grn_table_add(ctx, default_pos_table, "感動詞", strlen("感動詞"), NULL);
+    grn_table_add(ctx, default_pos_table, "接続詞", strlen("接続詞"), NULL);
+  }
+
   return ctx->rc;
 }
 
@@ -1391,6 +1406,10 @@ GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
   if (sole_mecab_mutex) {
     grn_plugin_mutex_close(ctx, sole_mecab_mutex);
     sole_mecab_mutex = NULL;
+  }
+
+  if (default_pos_table) {
+    grn_obj_unlink(ctx, default_pos_table);
   }
   return GRN_SUCCESS;
 }
