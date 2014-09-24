@@ -1161,11 +1161,14 @@ mysql_unicode_ci_custom_next(
   }
 
   grn_obj_unlink(ctx, &remove_checks);
+
   if (pos_table && pos_table != default_pos_table) {
     grn_obj_unlink(ctx, pos_table);
+    pos_table = NULL;
   }
   if (stopwords_table) {
     grn_obj_unlink(ctx, stopwords_table);
+    stopwords_table = NULL;
   }
   return NULL;
 }
@@ -1410,6 +1413,7 @@ GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
 
   if (default_pos_table) {
     grn_obj_unlink(ctx, default_pos_table);
+    default_pos_table = NULL;
   }
   return GRN_SUCCESS;
 }
