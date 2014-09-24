@@ -1057,6 +1057,7 @@ mysql_unicode_ci_custom_next(
   const char *normalizer_type_label = "yamysql";
   const char *original_string;
   unsigned int original_length_in_bytes;
+  int flags;
   grn_obj remove_checks;
   grn_obj *stopwords_table = NULL;
   grn_obj *pos_table = NULL;
@@ -1099,6 +1100,7 @@ mysql_unicode_ci_custom_next(
   }
 
   grn_string_get_original(ctx, string, &original_string, &original_length_in_bytes);
+  flags = grn_string_get_flags(ctx, string);
   GRN_OBJ_INIT(&remove_checks, GRN_BULK, 0, GRN_DB_VOID);
   grn_bulk_space(ctx, &remove_checks, original_length_in_bytes);
   GRN_BULK_REWIND(&remove_checks);
@@ -1138,13 +1140,17 @@ mysql_unicode_ci_custom_next(
       }
     }
   }
-
-  if (filter_pos || stopwords_table || stem_prolong) {
-    mecab_filter(ctx, original_string, original_length_in_bytes, encoding, &remove_checks,
-                 stopwords_table, pos_table, filter_symbol, filter_html, stem_prolong);
-  } else if (filter_symbol || filter_html) {
-    char_filter(ctx, original_string, original_length_in_bytes, encoding, &remove_checks,
-                filter_symbol, filter_html);
+  // ここのフラグチェックはキー探索時に呼び出されるWITH_NORMALIZE時にはフィルターさせないようにするもの
+  // トークナイザーとスニペットから呼ばれる際にはフィルターを有効にする。
+  // なお、ビルトインのTokenMecabとTokenDelimitはflags=0であるため判別しようがなくフィルターが動作しない
+  if (flags) {
+    if (filter_pos || stopwords_table || stem_prolong) {
+      mecab_filter(ctx, original_string, original_length_in_bytes, encoding, &remove_checks,
+                   stopwords_table, pos_table, filter_symbol, filter_html, stem_prolong);
+    } else if (filter_symbol || filter_html) {
+      char_filter(ctx, original_string, original_length_in_bytes, encoding, &remove_checks,
+                  filter_symbol, filter_html);
+    }
   }
 
   if (kana_ci) {
