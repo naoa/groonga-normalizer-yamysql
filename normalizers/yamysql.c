@@ -78,8 +78,6 @@ static grn_encoding sole_mecab_encoding = GRN_ENC_NONE;
 #define PARTOFSPEECH_TABLE_NAME "@yamysql_partofspeech"
 #define PARTOFSPEECH_TABLE_NAME_MRN "@0040yamysql_partofspeech"
 
-grn_obj *default_pos_table = NULL;
-
 static grn_encoding
 translate_mecab_charset_to_grn_encoding(const char *charset)
 {
@@ -474,7 +472,7 @@ normalize(grn_ctx *ctx, grn_obj *string,
           const char *normalizer_type_label,
           uint32_t **normalize_table,
           normalizer_func custom_normalizer,
-          grn_bool *remove_checks)
+          char *remove_checks)
 {
   const char *original, *rest;
   unsigned int original_length_in_bytes, rest_length;
@@ -527,7 +525,7 @@ normalize(grn_ctx *ctx, grn_obj *string,
       if (current_check) {
         current_check[0]++;
       }
-    } else if(remove_checks[current_remove_checks]) {
+    } else if(remove_checks[current_remove_checks] == '+') {
       if (current_type > types) {
         current_type[-1] |= GRN_CHAR_BLANK;
       }
@@ -839,19 +837,19 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
   unsigned int char_length;
   unsigned int current_char = 0;
   unsigned int rest_length = string_length;
-  grn_bool in_tag = GRN_FALSE;
+  char in_tag = ' ';
 
   while ((char_length = grn_plugin_charlen(ctx, string, rest_length, encoding))) {
-    grn_bool is_removed = GRN_FALSE;
+    char is_removed = ' ';
     if (filter_html) {
       switch (string[0]) {
         case '<' :
-          in_tag = GRN_TRUE;
-          is_removed = GRN_TRUE;
+          in_tag = '+';
+          is_removed = '+';
           break;
         case '>' :
-          in_tag = GRN_FALSE;
-          is_removed = GRN_TRUE;
+          in_tag = ' ';
+          is_removed = '+';
           break;
         default :
           break;
@@ -859,13 +857,13 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
     }
     if (filter_symbol) {
       if (grn_nfkc_char_type((unsigned char *)string) == GRN_CHAR_SYMBOL) {
-        is_removed = GRN_TRUE;
+        is_removed = '+';
       }
     }
-    if (filter_html && in_tag) {
-      grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(grn_bool));
+    if (filter_html && in_tag == '+') {
+      grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(char));
     } else {
-      grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(grn_bool));
+      grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(char));
     }
     current_char++;
     string += char_length;
@@ -888,7 +886,7 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
   const char *rest_string;
   unsigned int rest_string_length;
   unsigned int current_char;
-  grn_bool in_tag = GRN_FALSE;
+  char in_tag = ' ';
 
   if (!sole_mecab) {
     grn_plugin_mutex_lock(ctx, sole_mecab_mutex);
@@ -972,7 +970,7 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         unsigned int feature_rest_length = strlen(feature);
         const char *delimiter = ",";
         unsigned int pos_length = 0;
-        grn_bool is_removed = GRN_FALSE;
+        char is_removed = ' ';
         grn_bool is_token_removed = GRN_FALSE;
 
         while ((char_length = grn_plugin_charlen(ctx, feature, feature_rest_length, encoding))) {
@@ -990,36 +988,36 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         } 
 
         while ((char_length = grn_plugin_charlen(ctx, token, rest_length, encoding))) {
-          is_removed = GRN_FALSE;
+          is_removed = ' ';
 
           if (filter_html) {
             switch (token[0]) {
               case '<' :
-                in_tag = GRN_TRUE;
-                is_removed = GRN_TRUE;
+                in_tag = '+';
+                is_removed = '+';
                 break;
               case '>' :
-                in_tag = GRN_FALSE;
-                is_removed = GRN_TRUE;
+                in_tag = ' ';
+                is_removed = '+';
                 break;
               default :
                 break;
             }
           }
-          if (is_token_removed && !is_removed) {
-            is_removed = GRN_TRUE;
+          if (is_token_removed && is_removed == ' ') {
+            is_removed = '+';
           }
-          if (filter_symbol && !is_removed) {
+          if (filter_symbol && is_removed == ' ') {
             if (grn_nfkc_char_type((unsigned char *)token) == GRN_CHAR_SYMBOL) {
-              is_removed = GRN_TRUE;
+              is_removed = '+';
             }
           }
           
           if (rest_length - char_length) {
-            if (filter_html && in_tag) {
-              grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(grn_bool));
+            if (filter_html && in_tag == '+') {
+              grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(char));
             } else {
-              grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(grn_bool));
+              grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(char));
             }
           }
           current_char++;
@@ -1030,13 +1028,13 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         if (stem_prolong && node->length >= 12 && last_char_length == 3) {
           if (!memcmp(token - last_char_length, "ー", last_char_length) ||
               !memcmp(token - last_char_length, "ｰ", last_char_length)) {
-            is_removed = GRN_TRUE;
+            is_removed = '+';
           }
         }
-        if (filter_html && in_tag) {
-          grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(grn_bool));
+        if (filter_html && in_tag == '+') {
+          grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(char));
         } else {
-          grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(grn_bool));
+          grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(char));
         }
       }
     }
@@ -1057,8 +1055,8 @@ mysql_unicode_ci_custom_next(
   grn_obj *string = args[0];
   grn_encoding encoding;
   const char *normalizer_type_label = "yamysql";
-  const char *original_string;
-  unsigned int original_length_in_bytes;
+  const char *original_string = NULL;
+  unsigned int original_length_in_bytes = 0;
   int flags;
   grn_obj remove_checks;
   grn_obj *stopwords_table = NULL;
@@ -1129,7 +1127,19 @@ mysql_unicode_ci_custom_next(
                                 strlen(PARTOFSPEECH_TABLE_NAME_MRN));
       }
       if (!pos_table) {
-        pos_table = default_pos_table;
+        grn_obj *key_type;
+        key_type = grn_ctx_at(ctx, GRN_DB_SHORT_TEXT);
+        pos_table = grn_table_create(ctx, NULL, 0, NULL,
+                                     GRN_OBJ_TABLE_HASH_KEY,
+                                     key_type, NULL);
+        if (pos_table) {
+          grn_table_add(ctx, pos_table, "助詞", strlen("助詞"), NULL);
+          grn_table_add(ctx, pos_table, "助動詞", strlen("助動詞"), NULL);
+          grn_table_add(ctx, pos_table, "記号", strlen("記号"), NULL);
+          grn_table_add(ctx, pos_table, "補助記号", strlen("補助記号"), NULL);
+          grn_table_add(ctx, pos_table, "連体詞", strlen("連体詞"), NULL);
+          grn_table_add(ctx, pos_table, "接続詞", strlen("接続詞"), NULL);
+        }
       }
     }
   }
@@ -1151,18 +1161,18 @@ mysql_unicode_ci_custom_next(
               normalizer_type_label,
               custom_kana_ci_table,
               custom_normalizer,
-              (grn_bool *)GRN_BULK_HEAD(&remove_checks));
+              (char *)GRN_BULK_HEAD(&remove_checks));
   } else {
     normalize(ctx, string,
               normalizer_type_label,
               custom_table,
               custom_normalizer,
-              (grn_bool *)GRN_BULK_HEAD(&remove_checks));
+              (char *)GRN_BULK_HEAD(&remove_checks));
   }
 
   grn_obj_unlink(ctx, &remove_checks);
 
-  if (pos_table && pos_table != default_pos_table) {
+  if (pos_table) {
     grn_obj_unlink(ctx, pos_table);
     pos_table = NULL;
   }
@@ -1216,21 +1226,6 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
   }
 
   check_mecab_dictionary_encoding(ctx);
-
-  grn_obj *key_type;
-  key_type = grn_ctx_at(ctx, GRN_DB_SHORT_TEXT);
-  default_pos_table = grn_table_create(ctx, NULL, 0, NULL,
-                                       GRN_OBJ_TABLE_HASH_KEY,
-                                       key_type, NULL);
-  if (default_pos_table) {
-    grn_table_add(ctx, default_pos_table, "助詞", strlen("助詞"), NULL);
-    grn_table_add(ctx, default_pos_table, "助動詞", strlen("助動詞"), NULL);
-    grn_table_add(ctx, default_pos_table, "記号", strlen("記号"), NULL);
-    grn_table_add(ctx, default_pos_table, "補助記号", strlen("補助記号"), NULL);
-    grn_table_add(ctx, default_pos_table, "連体詞", strlen("連体詞"), NULL);
-    grn_table_add(ctx, default_pos_table, "感動詞", strlen("感動詞"), NULL);
-    grn_table_add(ctx, default_pos_table, "接続詞", strlen("接続詞"), NULL);
-  }
 
   return ctx->rc;
 }
@@ -1411,9 +1406,5 @@ GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
     sole_mecab_mutex = NULL;
   }
 
-  if (default_pos_table) {
-    grn_obj_unlink(ctx, default_pos_table);
-    default_pos_table = NULL;
-  }
   return GRN_SUCCESS;
 }
