@@ -42,9 +42,9 @@ class TwoCharTextParser
         current_page = original_code[3, 2]
         if @pages[current_page].nil?
           @pages[current_page] = []
-          puts characters
-          puts current_page
-          puts "#{line[0]}#{line[1]}"
+          # puts characters
+          # puts current_page
+          # puts "#{line[0]}#{line[1]}"
           # puts "#{line[1]}#{line[0]}"
           characters = @pages[current_page]
         end
@@ -69,7 +69,7 @@ File.open(two_char_text_path) do |two_char_text|
 end
 
 parser.sorted_pages.each do |page, characters|
-  puts "static uint32_t unicode_ci_custom_page_#{page}[] = {"
+  puts "static uint32_t custom_page_#{page}[] = {"
   for i in 0..255
     code = "0x0#{page}%02x" % i
     characters.each do |character|
@@ -97,13 +97,13 @@ parser.sorted_pages.each do |page, characters|
   puts ""
 end
 
-puts "static uint32_t *unicode_ci_custom_table[256] = {"
+puts "static uint32_t *custom_table[256] = {"
 for i in 0..255
   code = "%02x" % i
-  exist_code = "                     NULL"
+  exist_code = "          NULL"
   parser.sorted_pages.each do |page, characters|
     if code == page
-      exist_code = "unicode_ci_custom_page_#{page}"
+      exist_code = "custom_page_#{page}"
       break
     end
   end
