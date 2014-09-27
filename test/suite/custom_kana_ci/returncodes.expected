@@ -1,0 +1,28 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+normalize NormalizerYaMySQLKanaCI 'a\nb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"AB","types":["alpha","alpha"],"checks":[1,2]}]
+normalize NormalizerYaMySQLKanaCI 'a\rb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"AB","types":["alpha","alpha"],"checks":[1,2]}]
+normalize NormalizerYaMySQLKanaCI 'a\r\nb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"AB","types":["alpha","alpha"],"checks":[1,3]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml 'a\nb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"AB","types":["alpha","alpha"],"checks":[1,2]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml 'a\rb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"AB","types":["alpha","alpha"],"checks":[1,2]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml 'a\r\nb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"AB","types":["alpha","alpha"],"checks":[1,3]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml 'a\n' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"A","types":["alpha"],"checks":[1]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml 'a\r' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"A","types":["alpha"],"checks":[1]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml 'a\r\n' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"A","types":["alpha"],"checks":[1]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml '\nb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"B","types":["alpha"],"checks":[2]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml '\rb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"B","types":["alpha"],"checks":[2]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml '\r\nb' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"B","types":["alpha"],"checks":[3]}]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml 'a*b' WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],{"normalized":"AB","types":["unknown","alpha"],"checks":[1,2]}]
