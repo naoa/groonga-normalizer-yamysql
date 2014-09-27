@@ -78,6 +78,8 @@ static grn_encoding sole_mecab_encoding = GRN_ENC_NONE;
 #define PARTOFSPEECH_TABLE_NAME "@yamysql_partofspeech"
 #define PARTOFSPEECH_TABLE_NAME_MRN "@0040yamysql_partofspeech"
 
+static grn_hash *default_pos_table;
+
 static grn_encoding
 translate_mecab_charset_to_grn_encoding(const char *charset)
 {
@@ -892,7 +894,7 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
   unsigned int rfind_punct_offset = DEFAULT_RFIND_PUNCT_OFFSET;
   const char *rest_string;
   unsigned int rest_string_length;
-  unsigned int current_char;
+  unsigned int current_char = 0;
   grn_bool in_tag = GRN_FALSE;
 
   if (!sole_mecab) {
@@ -1115,39 +1117,28 @@ mysql_unicode_ci_custom_next(
                                 PARTOFSPEECH_TABLE_NAME_MRN,
                                 strlen(PARTOFSPEECH_TABLE_NAME_MRN));
       }
-      if (!pos_table) {
-        grn_obj *key_type;
-        key_type = grn_ctx_at(ctx, GRN_DB_SHORT_TEXT);
-        pos_table = grn_table_create(ctx, NULL, 0, NULL,
-                                     GRN_OBJ_TABLE_HASH_KEY,
-                                     key_type, NULL);
-        if (pos_table) {
-          grn_table_add(ctx, pos_table, "助詞", strlen("助詞"), NULL);
-          grn_table_add(ctx, pos_table, "助動詞", strlen("助動詞"), NULL);
-          grn_table_add(ctx, pos_table, "記号", strlen("記号"), NULL);
-          grn_table_add(ctx, pos_table, "補助記号", strlen("補助記号"), NULL);
-          grn_table_add(ctx, pos_table, "連体詞", strlen("連体詞"), NULL);
-          grn_table_add(ctx, pos_table, "接続詞", strlen("接続詞"), NULL);
-        }
-      }
     }
 
-    if (filter_pos || stopwords_table) {
+    if (filter_pos || stopwords_table || filter_symbol || filter_html) {
       grn_string_get_original(ctx, string, &original_string, &original_length_in_bytes);
       max_remove_checks_size = sizeof(grn_bool) * original_length_in_bytes + 1;
       remove_checks = GRN_PLUGIN_MALLOC(ctx, max_remove_checks_size);
+    }
 
+    if (filter_pos && pos_table) {
       mecab_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
                    stopwords_table, pos_table, filter_symbol, filter_html);
-
+    } else if (filter_pos && default_pos_table) {
+      mecab_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
+                   stopwords_table, (grn_obj *)default_pos_table, filter_symbol, filter_html);
+    } else if (stopwords_table) {
+      mecab_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
+                   stopwords_table, NULL, filter_symbol, filter_html);
     } else if (filter_symbol || filter_html) {
-      grn_string_get_original(ctx, string, &original_string, &original_length_in_bytes);
-      max_remove_checks_size = sizeof(grn_bool) * original_length_in_bytes + 1;
-      remove_checks = GRN_PLUGIN_MALLOC(ctx, max_remove_checks_size);
-
       char_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
                   filter_symbol, filter_html);
     }
+
     if (pos_table) {
       grn_obj_unlink(ctx, pos_table);
       pos_table = NULL;
@@ -1223,6 +1214,21 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
   }
 
   check_mecab_dictionary_encoding(ctx);
+
+  {
+    default_pos_table = grn_hash_create(ctx, NULL,
+                                        GRN_TABLE_MAX_KEY_SIZE,
+                                        0,
+                                        GRN_OBJ_TABLE_HASH_KEY|GRN_OBJ_KEY_VAR_SIZE);
+    if (default_pos_table) {
+      grn_hash_add(ctx, default_pos_table, "助詞", strlen("助詞"), NULL, NULL);
+      grn_hash_add(ctx, default_pos_table, "助動詞", strlen("助動詞"), NULL, NULL);
+      grn_hash_add(ctx, default_pos_table, "記号", strlen("記号"), NULL,  NULL);
+      grn_hash_add(ctx, default_pos_table, "補助記号", strlen("補助記号"), NULL, NULL);
+      grn_hash_add(ctx, default_pos_table, "連体詞", strlen("連体詞"), NULL, NULL);
+      grn_hash_add(ctx, default_pos_table, "接続詞", strlen("接続詞"), NULL, NULL);
+    }
+  }
 
   return ctx->rc;
 }
@@ -1348,6 +1354,10 @@ GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
   if (sole_mecab_mutex) {
     grn_plugin_mutex_close(ctx, sole_mecab_mutex);
     sole_mecab_mutex = NULL;
+  }
+  if (default_pos_table) {
+    grn_hash_close(ctx, default_pos_table);
+    default_pos_table = NULL;
   }
 
   return GRN_SUCCESS;
