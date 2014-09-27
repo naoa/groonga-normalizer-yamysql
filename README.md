@@ -7,25 +7,17 @@
 * ``NormalizerYaMySQLSymbol``
 * ``NormalizerYaMySQLSymbolHtml``
 * ``NormalizerYaMySQLPartofspeech``
-* ``NormalizerYaMySQLPartofspeechProlong``
 * ``NormalizerYaMySQLPartofspeechHtml``
-* ``NormalizerYaMySQLPartofspeechHtmlProlong``
 * ``NormalizerYaMySQLSymbolPartofspeech``
-* ``NormalizerYaMySQLSymbolPartofspeechProlong``
 * ``NormalizerYaMySQLSymbolPartofspeechHtml``
-* ``NormalizerYaMySQLSymbolPartofspeechHtmlProlong``
 * ``NormalizerYaMySQLKanaCI``
 * ``NormalizerYaMySQLKanaCIHtml``
 * ``NormalizerYaMySQLKanaCISymbol``
 * ``NormalizerYaMySQLKanaCISymbolHtml``
 * ``NormalizerYaMySQLKanaCIPartofspeech``
-* ``NormalizerYaMySQLKanaCIPartofspeechProlong``
 * ``NormalizerYaMySQLKanaCIPartofspeechHtml``
-* ``NormalizerYaMySQLKanaCIPartofspeechHtmlProlong``
 * ``NormalizerYaMySQLKanaCISymbolPartofspeech``
-* ``NormalizerYaMySQLKanaCISymbolPartofspeechProlong``
 * ``NormalizerYaMySQLKanaCISymbolPartofspeechHtml``
-* ``NormalizerYaMySQLKanaCISymbolPartofspeechHtmlProlong``
 
 
 ## Default
@@ -214,15 +206,6 @@ load --table @yamysql_stopwords
 ]
 normalize NormalizerYaMySQL "これはテストです。"
 [[0,0.0,0.0],{"normalized": "これはです。","types": [],"checks": []}]
-```
-
-### ``Prolong``
-
-* Mecabで分かち書きをし、4文字以上の単語末尾の長音記号(``ー``、``ｰ``)を除去します。  
-
-```
-normalize NormalizerYaMySQLPartofspeechProlong "データー"
-[[0,0.0,0.0],{"normalized":"データ","types":[],"checks":[]}]
 ```
 
 ## Install

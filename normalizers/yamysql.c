@@ -472,7 +472,7 @@ normalize(grn_ctx *ctx, grn_obj *string,
           const char *normalizer_type_label,
           uint32_t **normalize_table,
           normalizer_func custom_normalizer,
-          char *remove_checks)
+          grn_bool *remove_checks)
 {
   const char *original, *rest;
   unsigned int original_length_in_bytes, rest_length;
@@ -525,7 +525,7 @@ normalize(grn_ctx *ctx, grn_obj *string,
       if (current_check) {
         current_check[0]++;
       }
-    } else if(remove_checks[current_remove_checks] == '+') {
+    } else if (remove_checks && remove_checks[current_remove_checks]) {
       if (current_type > types) {
         current_type[-1] |= GRN_CHAR_BLANK;
       }
@@ -831,25 +831,25 @@ execute_token_filter(grn_ctx *ctx, const char *token, unsigned int token_length,
 
 static unsigned int
 char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
-            grn_encoding encoding, grn_obj *remove_checks,
+            grn_encoding encoding, grn_bool *remove_checks,
             grn_bool filter_symbol, grn_bool filter_html)
 {
   unsigned int char_length;
   unsigned int current_char = 0;
   unsigned int rest_length = string_length;
-  char in_tag = ' ';
+  grn_bool in_tag = GRN_FALSE;
 
   while ((char_length = grn_plugin_charlen(ctx, string, rest_length, encoding))) {
-    char is_removed = ' ';
+    grn_bool is_removed = GRN_FALSE;
     if (filter_html) {
       switch (string[0]) {
         case '<' :
-          in_tag = '+';
-          is_removed = '+';
+          in_tag = GRN_TRUE;
+          is_removed = GRN_TRUE;
           break;
         case '>' :
-          in_tag = ' ';
-          is_removed = '+';
+          in_tag = GRN_FALSE;
+          is_removed = GRN_TRUE;
           break;
         default :
           break;
@@ -857,13 +857,13 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
     }
     if (filter_symbol) {
       if (grn_nfkc_char_type((unsigned char *)string) == GRN_CHAR_SYMBOL) {
-        is_removed = '+';
+        is_removed = GRN_TRUE;
       }
     }
-    if (filter_html && in_tag == '+') {
-      grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(char));
+    if (filter_html && in_tag) {
+      remove_checks[current_char] = in_tag;
     } else {
-      grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(char));
+      remove_checks[current_char] = is_removed;
     }
     current_char++;
     string += char_length;
@@ -875,9 +875,9 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
 
 static unsigned int
 mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
-             grn_encoding encoding, grn_obj *remove_checks,
+             grn_encoding encoding, grn_bool *remove_checks,
              grn_obj *stopwords_table, grn_obj *pos_table,
-             grn_bool filter_symbol, grn_bool filter_html, grn_bool stem_prolong)
+             grn_bool filter_symbol, grn_bool filter_html)
 {
   mecab_t *mecab;
   const mecab_node_t *node;
@@ -886,7 +886,7 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
   const char *rest_string;
   unsigned int rest_string_length;
   unsigned int current_char;
-  char in_tag = ' ';
+  grn_bool in_tag = GRN_FALSE;
 
   if (!sole_mecab) {
     grn_plugin_mutex_lock(ctx, sole_mecab_mutex);
@@ -970,7 +970,7 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         unsigned int feature_rest_length = strlen(feature);
         const char *delimiter = ",";
         unsigned int pos_length = 0;
-        char is_removed = ' ';
+        grn_bool is_removed = GRN_FALSE;
         grn_bool is_token_removed = GRN_FALSE;
 
         while ((char_length = grn_plugin_charlen(ctx, feature, feature_rest_length, encoding))) {
@@ -988,53 +988,40 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         } 
 
         while ((char_length = grn_plugin_charlen(ctx, token, rest_length, encoding))) {
-          is_removed = ' ';
+          is_removed = GRN_FALSE;
 
           if (filter_html) {
             switch (token[0]) {
               case '<' :
-                in_tag = '+';
-                is_removed = '+';
+                in_tag = GRN_TRUE;
+                is_removed = GRN_TRUE;
                 break;
               case '>' :
-                in_tag = ' ';
-                is_removed = '+';
+                in_tag = GRN_FALSE;
+                is_removed = GRN_TRUE;
                 break;
               default :
                 break;
             }
           }
-          if (is_token_removed && is_removed == ' ') {
-            is_removed = '+';
+          if (is_token_removed && is_removed == GRN_FALSE) {
+            is_removed = GRN_TRUE;
           }
-          if (filter_symbol && is_removed == ' ') {
+          if (filter_symbol && is_removed == GRN_FALSE) {
             if (grn_nfkc_char_type((unsigned char *)token) == GRN_CHAR_SYMBOL) {
-              is_removed = '+';
+              is_removed = GRN_TRUE;
             }
           }
           
-          if (rest_length - char_length) {
-            if (filter_html && in_tag == '+') {
-              grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(char));
-            } else {
-              grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(char));
-            }
+          if (filter_html && in_tag == GRN_TRUE) {
+            remove_checks[current_char] = in_tag;
+          } else {
+            remove_checks[current_char] = is_removed;
           }
           current_char++;
           token += char_length;
           rest_length -= char_length;
           last_char_length = char_length;
-        }
-        if (stem_prolong && node->length >= 12 && last_char_length == 3) {
-          if (!memcmp(token - last_char_length, "ー", last_char_length) ||
-              !memcmp(token - last_char_length, "ｰ", last_char_length)) {
-            is_removed = '+';
-          }
-        }
-        if (filter_html && in_tag == '+') {
-          grn_bulk_write(ctx, remove_checks, (const char *)(&in_tag), sizeof(char));
-        } else {
-          grn_bulk_write(ctx, remove_checks, (const char *)(&is_removed), sizeof(char));
         }
       }
     }
@@ -1055,18 +1042,13 @@ mysql_unicode_ci_custom_next(
   grn_obj *string = args[0];
   grn_encoding encoding;
   const char *normalizer_type_label = "yamysql";
-  const char *original_string = NULL;
-  unsigned int original_length_in_bytes = 0;
   int flags;
-  grn_obj remove_checks;
-  grn_obj *stopwords_table = NULL;
-  grn_obj *pos_table = NULL;
   grn_bool filter_symbol = GRN_FALSE;
   grn_bool filter_pos = GRN_FALSE;
   grn_bool filter_html = GRN_FALSE;
-  grn_bool stem_prolong = GRN_FALSE;
   grn_bool kana_ci = GRN_FALSE;
   grn_obj *var; 
+  grn_bool *remove_checks = NULL;
 
   encoding = grn_string_get_encoding(ctx, string);
   if (encoding != GRN_ENC_UTF8) {
@@ -1090,22 +1072,20 @@ mysql_unicode_ci_custom_next(
   if (GRN_TEXT_LEN(var) != 0) { 
     filter_pos = GRN_BOOL_VALUE(var);
   }
-  var = grn_plugin_proc_get_var(ctx, user_data, "stem_prolong", -1); 
-  if (GRN_TEXT_LEN(var) != 0) { 
-    stem_prolong = GRN_BOOL_VALUE(var);
-  }
   var = grn_plugin_proc_get_var(ctx, user_data, "kana_ci", -1); 
   if (GRN_TEXT_LEN(var) != 0) { 
     kana_ci = GRN_BOOL_VALUE(var);
   }
 
-  grn_string_get_original(ctx, string, &original_string, &original_length_in_bytes);
   flags = grn_string_get_flags(ctx, string);
-  GRN_OBJ_INIT(&remove_checks, GRN_BULK, 0, GRN_DB_VOID);
-  grn_bulk_space(ctx, &remove_checks, original_length_in_bytes);
-  GRN_BULK_REWIND(&remove_checks);
 
   if (flags) {
+    grn_obj *stopwords_table = NULL;
+    grn_obj *pos_table = NULL;
+    const char *original_string = NULL;
+    unsigned int original_length_in_bytes = 0;
+    unsigned int max_remove_checks_size = 0;
+
     stopwords_table = grn_ctx_get(ctx,
                                   STOPWORDS_TABLE_NAME,
                                   strlen(STOPWORDS_TABLE_NAME));
@@ -1114,9 +1094,6 @@ mysql_unicode_ci_custom_next(
                                     STOPWORDS_TABLE_NAME_MRN,
                                     strlen(STOPWORDS_TABLE_NAME_MRN));
     }
-  }
-  
-  if (flags) {
     if (filter_pos) {
       pos_table = grn_ctx_get(ctx,
                               PARTOFSPEECH_TABLE_NAME,
@@ -1142,17 +1119,30 @@ mysql_unicode_ci_custom_next(
         }
       }
     }
-  }
-  // ここのフラグチェックはキー探索時に呼び出されるWITH_NORMALIZE時にはフィルターさせないようにするもの
-  // トークナイザーとスニペットから呼ばれる際にはフィルターを有効にする。
-  // なお、ビルトインのTokenMecabとTokenDelimitはflags=0であるため判別しようがなくフィルターが動作しない
-  if (flags) {
-    if (filter_pos || stopwords_table || stem_prolong) {
-      mecab_filter(ctx, original_string, original_length_in_bytes, encoding, &remove_checks,
-                   stopwords_table, pos_table, filter_symbol, filter_html, stem_prolong);
+
+    if (filter_pos || stopwords_table) {
+      grn_string_get_original(ctx, string, &original_string, &original_length_in_bytes);
+      max_remove_checks_size = sizeof(grn_bool) * original_length_in_bytes + 1;
+      remove_checks = GRN_PLUGIN_MALLOC(ctx, max_remove_checks_size);
+
+      mecab_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
+                   stopwords_table, pos_table, filter_symbol, filter_html);
+
     } else if (filter_symbol || filter_html) {
-      char_filter(ctx, original_string, original_length_in_bytes, encoding, &remove_checks,
+      grn_string_get_original(ctx, string, &original_string, &original_length_in_bytes);
+      max_remove_checks_size = sizeof(grn_bool) * original_length_in_bytes + 1;
+      remove_checks = GRN_PLUGIN_MALLOC(ctx, max_remove_checks_size);
+
+      char_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
                   filter_symbol, filter_html);
+    }
+    if (pos_table) {
+      grn_obj_unlink(ctx, pos_table);
+      pos_table = NULL;
+    }
+    if (stopwords_table) {
+      grn_obj_unlink(ctx, stopwords_table);
+      stopwords_table = NULL;
     }
   }
 
@@ -1161,25 +1151,20 @@ mysql_unicode_ci_custom_next(
               normalizer_type_label,
               custom_kana_ci_table,
               custom_normalizer,
-              (char *)GRN_BULK_HEAD(&remove_checks));
+              remove_checks);
   } else {
     normalize(ctx, string,
               normalizer_type_label,
               custom_table,
               custom_normalizer,
-              (char *)GRN_BULK_HEAD(&remove_checks));
+              remove_checks);
   }
 
-  grn_obj_unlink(ctx, &remove_checks);
+  if (remove_checks) {
+    GRN_PLUGIN_FREE(ctx, remove_checks);
+    remove_checks = NULL;
+  }
 
-  if (pos_table) {
-    grn_obj_unlink(ctx, pos_table);
-    pos_table = NULL;
-  }
-  if (stopwords_table) {
-    grn_obj_unlink(ctx, stopwords_table);
-    stopwords_table = NULL;
-  }
   return NULL;
 }
 
@@ -1239,157 +1224,104 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   grn_plugin_expr_var_init(ctx, &vars[1], "filter_symbol", -1);
   grn_plugin_expr_var_init(ctx, &vars[2], "filter_html", -1);
   grn_plugin_expr_var_init(ctx, &vars[3], "filter_pos", -1);
-  grn_plugin_expr_var_init(ctx, &vars[4], "stem_prolong", -1);
-  grn_plugin_expr_var_init(ctx, &vars[5], "kana_ci", -1);
+  grn_plugin_expr_var_init(ctx, &vars[4], "kana_ci", -1);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
   GRN_BOOL_SET(ctx, &vars[2].value, GRN_FALSE);
   GRN_BOOL_SET(ctx, &vars[3].value, GRN_FALSE);
   GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
 
   grn_proc_create(ctx, "NormalizerYaMySQL", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_TRUE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLKanaCI", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[2].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
   grn_proc_create(ctx, "NormalizerYaMySQLHtml", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_TRUE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLKanaCIHtml", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
   GRN_BOOL_SET(ctx, &vars[2].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
   grn_proc_create(ctx, "NormalizerYaMySQLSymbol", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_TRUE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbol", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
   GRN_BOOL_SET(ctx, &vars[2].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
   grn_proc_create(ctx, "NormalizerYaMySQLSymbolHtml", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_TRUE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbolHtml", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
   GRN_BOOL_SET(ctx, &vars[2].value, GRN_FALSE);
   GRN_BOOL_SET(ctx, &vars[3].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
   grn_proc_create(ctx, "NormalizerYaMySQLPartofspeech", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLSymbolPartofspeech", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_TRUE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLKanaCIPartofspeech", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbolPartofspeech", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[2].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[3].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
-  grn_proc_create(ctx, "NormalizerYaMySQLPartofspeechProlong", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLSymbolPartofspeechProlong", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCIPartofspeechProlong", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbolPartofspeechProlong", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
   GRN_BOOL_SET(ctx, &vars[2].value, GRN_TRUE);
   GRN_BOOL_SET(ctx, &vars[3].value, GRN_TRUE);
   GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
   grn_proc_create(ctx, "NormalizerYaMySQLPartofspeechHtml", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLSymbolPartofspeechHtml", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_TRUE);
+  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLKanaCIPartofspeechHtml", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
   grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbolPartofspeechHtml", -1,
                   GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[2].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[3].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
-  grn_proc_create(ctx, "NormalizerYaMySQLPartofspeechHtmlProlong", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLSymbolPartofspeechHtmlProlong", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCIPartofspeechHtmlProlong", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbolPartofspeechHtmlProlong", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 6, vars);
+                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
 
   return GRN_SUCCESS;
 }

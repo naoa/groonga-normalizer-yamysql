@@ -1,3 +1,0 @@
-register normalizers/yamysql
-normalize NormalizerYaMySQL "デ-ター" WITH_TYPES|WITH_CHECKS
-

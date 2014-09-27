@@ -4,7 +4,7 @@ register function/snippet_tritonn
 table_create Entries TABLE_NO_KEY
 column_create Entries content COLUMN_SCALAR ShortText
 
-table_create Tokens TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLPartofspeechHtmlProlong
+table_create Tokens TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLPartofspeechHtml
 column_create Tokens entries_content COLUMN_INDEX|WITH_POSITION Entries content
 
 load --table Entries
@@ -14,7 +14,7 @@ load --table Entries
 
 select Entries \
   --output_columns 'snippet_tritonn(content, 200, 2, \
-  "NormalizerYaMySQLPartofspeechHtmlProlong", \
+  "NormalizerYaMySQLPartofspeechHtml", \
   1, 1, "...", "...", \
   "テストの終わり", "<span class=\\"w1\\">", "</span>"), content' \
   --command_version 2 \
@@ -23,7 +23,7 @@ select Entries \
 
 select Entries \
   --output_columns 'snippet_tritonn(content, 200, 2, \
-  "NormalizerYaMySQLPartofspeechHtmlProlong", \
+  "NormalizerYaMySQLPartofspeechHtml", \
   1, 1, "...", "...", \
   "テスト終わり", "<span class=\\"w1\\">", "</span>"), content' \
   --command_version 2 \
