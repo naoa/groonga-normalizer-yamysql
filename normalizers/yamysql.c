@@ -1079,6 +1079,8 @@ mysql_unicode_ci_custom_next(
 
   flags = grn_string_get_flags(ctx, string);
 
+  //キー操作のWITH_NORMALIZEでノーマライザーが呼ばれた場合は、フィルター処理は動作しないようにする。
+  //TokenMecab、TokenDelimitではflagがなく区別できないため、フィルター処理は常に動作しない。
   if (flags) {
     grn_obj *stopwords_table = NULL;
     grn_obj *pos_table = NULL;
