@@ -1,0 +1,8 @@
+register normalizers/yamysql
+
+normalize NormalizerYaMySQLSymbolPartofspeechHtml "クロアチア の戦争" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチアの戦争" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLSymbolPartofspeechHtml "クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチア の戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチア の戦争 " REMOVE_BLANK|WITH_TYPES|WITH_CHECKS

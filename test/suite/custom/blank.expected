@@ -1,0 +1,266 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+normalize NormalizerYaMySQLSymbolPartofspeechHtml "クロアチア の戦争" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "クロアチア戦争",
+    "types": [
+      "katakana",
+      "katakana",
+      "katakana",
+      "katakana",
+      "unknown",
+      "kanji",
+      "kanji"
+    ],
+    "checks": [
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      7,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
+normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチアの戦争" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": " クロアチア戦争",
+    "types": [
+      "others",
+      "katakana",
+      "katakana",
+      "katakana",
+      "katakana",
+      "unknown",
+      "kanji",
+      "kanji"
+    ],
+    "checks": [
+      1,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      6,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
+normalize NormalizerYaMySQLSymbolPartofspeechHtml "クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "クロアチア戦争",
+    "types": [
+      "katakana",
+      "katakana",
+      "katakana",
+      "katakana",
+      "unknown",
+      "kanji",
+      "unknown"
+    ],
+    "checks": [
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      6,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
+normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": " クロアチア戦争",
+    "types": [
+      "others",
+      "katakana",
+      "katakana",
+      "katakana",
+      "katakana",
+      "unknown",
+      "kanji",
+      "unknown"
+    ],
+    "checks": [
+      1,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      6,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
+normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチア の戦争 " WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": " クロアチア戦争",
+    "types": [
+      "others",
+      "katakana",
+      "katakana",
+      "katakana",
+      "katakana",
+      "unknown",
+      "kanji",
+      "unknown"
+    ],
+    "checks": [
+      1,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      7,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
+normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチア の戦争 " REMOVE_BLANK|WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "クロアチア戦争",
+    "types": [
+      "katakana",
+      "katakana",
+      "katakana",
+      "katakana",
+      "unknown",
+      "kanji",
+      "unknown"
+    ],
+    "checks": [
+      4,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      7,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
