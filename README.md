@@ -58,7 +58,7 @@ normalize NormalizerYaMySQL "フィルム"
 
 ### ``Return``
 
-* 改行コード(CR,LF)を半角スペースを除去します。
+* 改行コード(CR,LF)を除去します。
 
     > CARRIAGE_RETURN      0x0000d  
     > LINE_FEED      0x0000a
