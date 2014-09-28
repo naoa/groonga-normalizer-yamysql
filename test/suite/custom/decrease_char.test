@@ -1,0 +1,4 @@
+register normalizers/yamysql
+
+normalize NormalizerYaMySQLSymbolPartofspeechHtml "ヴァイオリンの演奏" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLSymbolPartofspeechHtml "ﾊﾞｲｵﾘﾝの演奏" WITH_TYPES|WITH_CHECKS

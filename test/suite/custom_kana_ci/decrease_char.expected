@@ -1,0 +1,88 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "ヴァイオリンの演奏" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "バイオリン演奏",
+    "types": [
+      "katakana",
+      "katakana",
+      "katakana",
+      "katakana",
+      "unknown",
+      "kanji",
+      "kanji"
+    ],
+    "checks": [
+      6,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      6,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
+normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "ﾊﾞｲｵﾘﾝの演奏" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "バイオリン演奏",
+    "types": [
+      "katakana",
+      "katakana",
+      "katakana",
+      "katakana",
+      "unknown",
+      "kanji",
+      "kanji"
+    ],
+    "checks": [
+      6,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      6,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]

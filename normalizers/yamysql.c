@@ -585,7 +585,11 @@ normalize(grn_ctx *ctx, grn_obj *string,
     if (!(character_length == 1 &&
           (rest[0] == ' ' || rest[0] == 0x000a || rest[0] == 0x000d)
         )) {
-      current_remove_checks++;
+      if (character_length == 6) {
+        current_remove_checks += 2;
+      } else {
+        current_remove_checks++;
+      }
     }
     rest += character_length;
     rest_length -= character_length;
