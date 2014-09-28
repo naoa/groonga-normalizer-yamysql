@@ -78,7 +78,7 @@ static grn_encoding sole_mecab_encoding = GRN_ENC_NONE;
 #define PARTOFSPEECH_TABLE_NAME "@yamysql_partofspeech"
 #define PARTOFSPEECH_TABLE_NAME_MRN "@0040yamysql_partofspeech"
 
-static grn_hash *default_pos_table;
+static grn_hash *default_pos_table = NULL;
 
 static grn_encoding
 translate_mecab_charset_to_grn_encoding(const char *charset)
