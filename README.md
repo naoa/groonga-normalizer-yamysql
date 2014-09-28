@@ -138,7 +138,7 @@ normalize NormalizerYaMySQL "おっづ"
 * ひらがなカタカナ小文字を大文字に正規化します。
 
 ```
-> normalize NormalizerYaMySQLKanaCI "フィルム"
+normalize NormalizerYaMySQLKanaCI "フィルム"
 [[0,0.0,0.0],{"normalized":"フイルム","types":[],"checks":[]}]
 ```
 
