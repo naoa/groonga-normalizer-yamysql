@@ -531,9 +531,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
       if (current_check) {
         current_check[0]++;
       }
-      rest += character_length;
-      rest_length -= character_length;
-      continue;
     } else if (remove_checks && remove_checks[current_remove_checks]) {
       if (current_type > types) {
         current_type[-1] |= GRN_CHAR_BLANK;
@@ -585,9 +582,13 @@ normalize(grn_ctx *ctx, grn_obj *string,
         }
       }
     }
+    if (!(character_length == 1 &&
+          (rest[0] == ' ' || rest[0] == 0x000a || rest[0] == 0x000d)
+        )) {
+      current_remove_checks++;
+    }
     rest += character_length;
     rest_length -= character_length;
-    current_remove_checks++;
   }
   if (current_type) {
     current_type[0] = GRN_CHAR_NULL;
