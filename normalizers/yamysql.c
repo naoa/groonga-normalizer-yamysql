@@ -532,11 +532,17 @@ normalize(grn_ctx *ctx, grn_obj *string,
         current_check[0]++;
       }
     } else if (remove_checks && remove_checks[current_remove_checks]) {
-      if (current_type > types) {
-        current_type[-1] |= GRN_CHAR_BLANK;
+      normalized[normalized_length_in_bytes] = ' ';
+      normalized_length_in_bytes++;
+      normalized_n_characters++;
+      if (current_type) {
+        current_type[0] = GRN_CHAR_BLANK;
+        current_type++;
       }
       if (current_check) {
         current_check[0] += character_length;
+        current_check++;
+        current_check[0] = 0;
       }
     } else {
       grn_bool custom_normalized = GRN_FALSE;

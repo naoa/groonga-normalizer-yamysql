@@ -25,4 +25,23 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml '\rb' WITH_TYPES|WITH_CHECKS
 normalize NormalizerYaMySQLSymbolPartofspeechHtml '\r\nb' WITH_TYPES|WITH_CHECKS
 [[0,0.0,0.0],{"normalized":"B","types":["alpha"],"checks":[3]}]
 normalize NormalizerYaMySQLSymbolPartofspeechHtml 'a*b' WITH_TYPES|WITH_CHECKS
-[[0,0.0,0.0],{"normalized":"AB","types":["unknown","alpha"],"checks":[1,2]}]
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "A B",
+    "types": [
+      "alpha",
+      "unknown",
+      "alpha"
+    ],
+    "checks": [
+      1,
+      1,
+      1
+    ]
+  }
+]

@@ -15,18 +15,28 @@ normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES
     0.0
   ],
   {
-    "normalized": "はです。",
+    "normalized": "  は   です。",
     "types": [
+      "unknown",
+      "unknown",
+      "hiragana",
+      "unknown",
+      "unknown",
       "unknown",
       "hiragana",
       "hiragana",
       "symbol"
     ],
     "checks": [
-      9,
+      3,
+      3,
+      3,
       0,
       0,
-      12,
+      3,
+      3,
+      3,
+      3,
       0,
       0,
       3,

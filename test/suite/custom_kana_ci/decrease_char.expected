@@ -8,8 +8,9 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "ヴァイオリンの�
     0.0
   ],
   {
-    "normalized": "バイオリン演奏",
+    "normalized": "バイオリン 演奏",
     "types": [
+      "katakana",
       "katakana",
       "katakana",
       "katakana",
@@ -34,7 +35,8 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "ヴァイオリンの�
       3,
       0,
       0,
-      6,
+      3,
+      3,
       0,
       0,
       3,
@@ -51,8 +53,9 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "ﾊﾞｲｵﾘﾝの�
     0.0
   ],
   {
-    "normalized": "バイオリン演奏",
+    "normalized": "バイオリン 演奏",
     "types": [
+      "katakana",
       "katakana",
       "katakana",
       "katakana",
@@ -77,7 +80,8 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "ﾊﾞｲｵﾘﾝの�
       3,
       0,
       0,
-      6,
+      3,
+      3,
       0,
       0,
       3,

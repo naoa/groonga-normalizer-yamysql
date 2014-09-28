@@ -1,5 +1,5 @@
 register normalizers/yamysql
-register function/snippet_tritonn
+register functions/snippet_tritonn
 
 normalize NormalizerYaMySQLSymbol "実践!!C++" WITH_TYPES|WITH_CHECKS
 
