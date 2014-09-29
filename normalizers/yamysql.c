@@ -1246,8 +1246,6 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
   if (default_pos_table) {
     grn_hash_add(ctx, default_pos_table, "助詞", strlen("助詞"), NULL, NULL);
     grn_hash_add(ctx, default_pos_table, "助動詞", strlen("助動詞"), NULL, NULL);
-    grn_hash_add(ctx, default_pos_table, "記号", strlen("記号"), NULL,  NULL);
-    grn_hash_add(ctx, default_pos_table, "補助記号", strlen("補助記号"), NULL, NULL);
     grn_hash_add(ctx, default_pos_table, "連体詞", strlen("連体詞"), NULL, NULL);
     grn_hash_add(ctx, default_pos_table, "接続詞", strlen("接続詞"), NULL, NULL);
   }
