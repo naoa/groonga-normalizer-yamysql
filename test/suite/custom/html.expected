@@ -8,36 +8,24 @@ normalize NormalizerYaMySQLHtml "<p>これは<b>テスト</b>です。</p>" WITH
     0.0
   ],
   {
-    "normalized": "   これは   テスト    です。    ",
+    "normalized": " これは テスト です。 ",
     "types": [
       "unknown",
-      "unknown",
-      "unknown",
       "hiragana",
       "hiragana",
       "hiragana",
       "unknown",
-      "unknown",
-      "unknown",
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
-      "unknown",
-      "unknown",
       "unknown",
       "hiragana",
       "hiragana",
       "symbol",
-      "unknown",
-      "unknown",
-      "unknown",
       "unknown"
     ],
     "checks": [
-      1,
-      1,
-      1,
+      3,
       3,
       0,
       0,
@@ -47,9 +35,7 @@ normalize NormalizerYaMySQLHtml "<p>これは<b>テスト</b>です。</p>" WITH
       3,
       0,
       0,
-      1,
-      1,
-      1,
+      3,
       3,
       0,
       0,
@@ -59,10 +45,7 @@ normalize NormalizerYaMySQLHtml "<p>これは<b>テスト</b>です。</p>" WITH
       3,
       0,
       0,
-      1,
-      1,
-      1,
-      1,
+      4,
       3,
       0,
       0,
@@ -72,10 +55,7 @@ normalize NormalizerYaMySQLHtml "<p>これは<b>テスト</b>です。</p>" WITH
       3,
       0,
       0,
-      1,
-      1,
-      1,
-      1
+      4
     ]
   }
 ]

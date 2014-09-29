@@ -10,14 +10,12 @@ normalize NormalizerYaMySQLSymbol "実践!!C++" WITH_TYPES|WITH_CHECKS
     0.0
   ],
   {
-    "normalized": "実践  C  ",
+    "normalized": "実践 C ",
     "types": [
       "kanji",
       "kanji",
       "unknown",
-      "unknown",
       "alpha",
-      "unknown",
       "unknown"
     ],
     "checks": [
@@ -27,11 +25,9 @@ normalize NormalizerYaMySQLSymbol "実践!!C++" WITH_TYPES|WITH_CHECKS
       3,
       0,
       0,
+      2,
       1,
-      1,
-      1,
-      1,
-      1
+      2
     ]
   }
 ]

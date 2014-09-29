@@ -8,7 +8,7 @@ normalize NormalizerYaMySQLSymbol "<p>これは<b>テスト</b>です。</p>" WI
     0.0
   ],
   {
-    "normalized": " P これは B テスト  B です   P ",
+    "normalized": " P これは B テスト B です P ",
     "types": [
       "unknown",
       "alpha",
@@ -23,13 +23,10 @@ normalize NormalizerYaMySQLSymbol "<p>これは<b>テスト</b>です。</p>" WI
       "katakana",
       "katakana",
       "unknown",
-      "unknown",
       "alpha",
       "unknown",
       "hiragana",
       "hiragana",
-      "unknown",
-      "unknown",
       "unknown",
       "alpha",
       "unknown"
@@ -59,8 +56,7 @@ normalize NormalizerYaMySQLSymbol "<p>これは<b>テスト</b>です。</p>" WI
       3,
       0,
       0,
-      1,
-      1,
+      2,
       1,
       1,
       3,
@@ -69,9 +65,7 @@ normalize NormalizerYaMySQLSymbol "<p>これは<b>テスト</b>です。</p>" WI
       3,
       0,
       0,
-      3,
-      1,
-      1,
+      5,
       1,
       1
     ]

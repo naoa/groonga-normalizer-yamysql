@@ -8,14 +8,13 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "クロアチア の戦�
     0.0
   ],
   {
-    "normalized": "クロアチア  戦争",
+    "normalized": "クロアチア 戦争",
     "types": [
       "katakana",
       "katakana",
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
       "unknown",
       "kanji",
       "kanji"
@@ -36,8 +35,7 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "クロアチア の戦�
       3,
       0,
       0,
-      1,
-      3,
+      4,
       3,
       0,
       0,
@@ -198,7 +196,7 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml " クロアチア の戦
     0.0
   ],
   {
-    "normalized": " クロアチア  戦争 ",
+    "normalized": " クロアチア 戦争 ",
     "types": [
       "others",
       "katakana",
@@ -206,7 +204,6 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml " クロアチア の戦
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
       "unknown",
       "kanji",
       "kanji",
@@ -229,8 +226,7 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml " クロアチア の戦
       3,
       0,
       0,
-      1,
-      3,
+      4,
       3,
       0,
       0,
