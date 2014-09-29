@@ -539,9 +539,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
         normalized_length_in_bytes++;
         normalized_n_characters++;
         if (current_type) {
-          if (remove_blank_p) {
-            current_type[-1] |= GRN_CHAR_BLANK;
-          }
           current_type[0] = GRN_CHAR_BLANK;
           current_type++;
         }
