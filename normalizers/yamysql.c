@@ -489,10 +489,12 @@ normalize(grn_ctx *ctx, grn_obj *string,
   int flags;
   grn_bool remove_blank_p;
   unsigned int current_remove_checks = 0;
+  grn_bool is_removed = GRN_FALSE;
 
   encoding = grn_string_get_encoding(ctx, string);
   flags = grn_string_get_flags(ctx, string);
   remove_blank_p = flags & GRN_STRING_REMOVE_BLANK;
+
   grn_string_get_original(ctx, string, &original, &original_length_in_bytes);
   {
     unsigned int max_normalized_length_in_bytes =
@@ -532,18 +534,28 @@ normalize(grn_ctx *ctx, grn_obj *string,
         current_check[0]++;
       }
     } else if (remove_checks && remove_checks[current_remove_checks]) {
-      normalized[normalized_length_in_bytes] = ' ';
-      normalized_length_in_bytes++;
-      normalized_n_characters++;
-      if (current_type) {
-        current_type[0] = GRN_CHAR_BLANK;
-        current_type++;
+      if (!is_removed) {
+        normalized[normalized_length_in_bytes] = ' ';
+        normalized_length_in_bytes++;
+        normalized_n_characters++;
+        if (current_type) {
+          if (remove_blank_p) {
+            current_type[-1] |= GRN_CHAR_BLANK;
+          }
+          current_type[0] = GRN_CHAR_BLANK;
+          current_type++;
+        }
+        if (current_check) {
+          current_check[0] += character_length;
+          current_check++;
+          current_check[0] = 0;
+        }
+      } else {
+        if (current_check) {
+          current_check[-1] += character_length;
+        }
       }
-      if (current_check) {
-        current_check[0] += character_length;
-        current_check++;
-        current_check[0] = 0;
-      }
+      is_removed = GRN_TRUE;
     } else {
       grn_bool custom_normalized = GRN_FALSE;
       unsigned int normalized_character_length;
@@ -587,6 +599,7 @@ normalize(grn_ctx *ctx, grn_obj *string,
           current_check[0] = 0;
         }
       }
+      is_removed = GRN_FALSE;
     }
     if (!(character_length == 1 &&
           (rest[0] == ' ' || rest[0] == 0x000a || rest[0] == 0x000d)
