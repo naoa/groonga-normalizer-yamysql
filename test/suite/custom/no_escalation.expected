@@ -1,0 +1,198 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+table_create text TABLE_NO_KEY
+[[0,0.0,0.0],true]
+column_create text text COLUMN_SCALAR LongText
+[[0,0.0,0.0],true]
+tokenize TokenBigram "時代の歌人" NormalizerYaMySQLPartofspeech --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "時代",
+      "position": 0
+    },
+    {
+      "value": "代 ",
+      "position": 1
+    },
+    {
+      "value": " 歌",
+      "position": 2
+    },
+    {
+      "value": "歌人",
+      "position": 3
+    },
+    {
+      "value": "人",
+      "position": 4
+    }
+  ]
+]
+tokenize TokenBigram "時代の歌人" NormalizerYaMySQLPartofspeech --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "時代",
+      "position": 0
+    },
+    {
+      "value": "代 ",
+      "position": 1
+    },
+    {
+      "value": " 歌",
+      "position": 2
+    },
+    {
+      "value": "歌人",
+      "position": 3
+    }
+  ]
+]
+tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "時代",
+      "position": 0
+    },
+    {
+      "value": "代の",
+      "position": 1
+    },
+    {
+      "value": "の歌",
+      "position": 2
+    },
+    {
+      "value": "歌人",
+      "position": 3
+    },
+    {
+      "value": "人",
+      "position": 4
+    }
+  ]
+]
+tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "時代",
+      "position": 0
+    },
+    {
+      "value": "代の",
+      "position": 1
+    },
+    {
+      "value": "の歌",
+      "position": 2
+    },
+    {
+      "value": "歌人",
+      "position": 3
+    }
+  ]
+]
+normalize NormalizerYaMySQLPartofspeech "時代の歌人" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "時代 歌人",
+    "types": [
+      "kanji",
+      "kanji",
+      "null",
+      "kanji",
+      "kanji"
+    ],
+    "checks": [
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
+normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "時代の歌人",
+    "types": [
+      "kanji",
+      "kanji",
+      "hiragana",
+      "kanji",
+      "kanji"
+    ],
+    "checks": [
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0
+    ]
+  }
+]
+load --table text
+[
+["text"],
+["時代の歌人"]
+]
+[[0,0.0,0.0],1]
+table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLPartofspeech
+[[0,0.0,0.0],true]
+column_create text-text index COLUMN_INDEX|WITH_POSITION text text
+[[0,0.0,0.0],true]
+select text --match_columns text --query '時代の歌' --output_columns _key,title,text --limit 1 --match_escalation_threshold -1
+[[0,0.0,0.0],[[[1],[["text","LongText"]],["時代の歌人"]]]]

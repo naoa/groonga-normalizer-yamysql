@@ -539,7 +539,7 @@ normalize(grn_ctx *ctx, grn_obj *string,
         normalized_length_in_bytes++;
         normalized_n_characters++;
         if (current_type) {
-          current_type[0] = GRN_CHAR_BLANK;
+          current_type[0] = GRN_CHAR_NULL;
           current_type++;
         }
         if (current_check) {

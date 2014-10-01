@@ -1,0 +1,24 @@
+register normalizers/yamysql
+
+table_create text TABLE_NO_KEY
+column_create text text COLUMN_SCALAR LongText
+
+tokenize TokenBigram "時代の歌人" NormalizerYaMySQLPartofspeech --mode ADD
+tokenize TokenBigram "時代の歌人" NormalizerYaMySQLPartofspeech --mode GET
+tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode ADD
+tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode GET
+
+normalize NormalizerYaMySQLPartofspeech "時代の歌人" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
+
+load --table text
+[
+["text"],
+["時代の歌人"]
+]
+
+table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLPartofspeech
+
+column_create text-text index COLUMN_INDEX|WITH_POSITION text text
+
+select text --match_columns text --query '時代の歌' --output_columns _key,title,text --limit 1 --match_escalation_threshold -1
