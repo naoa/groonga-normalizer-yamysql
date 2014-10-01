@@ -10,19 +10,19 @@ normalize NormalizerYaMySQLHtml "<p>これは<b>テスト</b>です。</p>" WITH
   {
     "normalized": " これは テスト です。 ",
     "types": [
-      "unknown",
+      "null",
       "hiragana",
       "hiragana",
       "hiragana",
-      "unknown",
+      "null",
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "hiragana",
       "hiragana",
       "symbol",
-      "unknown"
+      "null"
     ],
     "checks": [
       3,

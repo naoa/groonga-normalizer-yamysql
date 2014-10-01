@@ -15,7 +15,7 @@ normalize NormalizerYaMySQLSymbol "データ+ベース" WITH_TYPES|WITH_CHECKS
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "katakana",
       "katakana",
       "katakana"

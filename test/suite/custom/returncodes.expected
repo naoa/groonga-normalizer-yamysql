@@ -35,7 +35,7 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml 'a*b' WITH_TYPES|WITH_CHECKS
     "normalized": "A B",
     "types": [
       "alpha",
-      "unknown",
+      "null",
       "alpha"
     ],
     "checks": [

@@ -10,19 +10,19 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml "**これは<b>テスト</b>�
   {
     "normalized": " これ テスト データー ",
     "types": [
-      "unknown",
+      "null",
       "hiragana",
       "hiragana",
-      "unknown",
+      "null",
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "katakana",
       "katakana",
       "katakana",
       "katakana",
-      "unknown"
+      "null"
     ],
     "checks": [
       2,

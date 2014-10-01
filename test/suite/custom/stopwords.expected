@@ -20,7 +20,7 @@ normalize NormalizerYaMySQL "これはテストです。" WITH_TYPES|WITH_CHECKS
       "hiragana",
       "hiragana",
       "hiragana",
-      "unknown",
+      "null",
       "hiragana",
       "hiragana",
       "symbol"

@@ -14,9 +14,9 @@ normalize NormalizerYaMySQLSymbol "実践!!C++" WITH_TYPES|WITH_CHECKS
     "types": [
       "kanji",
       "kanji",
-      "unknown",
+      "null",
       "alpha",
-      "unknown"
+      "null"
     ],
     "checks": [
       3,

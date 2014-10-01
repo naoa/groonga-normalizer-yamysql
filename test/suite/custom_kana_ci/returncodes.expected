@@ -35,7 +35,7 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml 'a*b' WITH_TYPES|WITH_CH
     "normalized": "A B",
     "types": [
       "alpha",
-      "unknown",
+      "null",
       "alpha"
     ],
     "checks": [

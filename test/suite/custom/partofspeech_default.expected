@@ -12,11 +12,11 @@ normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES
     "types": [
       "hiragana",
       "hiragana",
-      "unknown",
+      "null",
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "symbol"
     ],
     "checks": [

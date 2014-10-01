@@ -17,9 +17,9 @@ normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES
   {
     "normalized": " は です。",
     "types": [
-      "unknown",
+      "null",
       "hiragana",
-      "unknown",
+      "null",
       "hiragana",
       "hiragana",
       "symbol"

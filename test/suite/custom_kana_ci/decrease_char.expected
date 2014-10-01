@@ -15,7 +15,7 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "ヴァイオリンの�
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "kanji",
       "kanji"
     ],
@@ -60,7 +60,7 @@ normalize NormalizerYaMySQLKanaCISymbolPartofspeechHtml "ﾊﾞｲｵﾘﾝの�
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "kanji",
       "kanji"
     ],

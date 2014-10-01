@@ -15,7 +15,7 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml "クロアチア の戦争" WI
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "kanji",
       "kanji"
     ],
@@ -61,7 +61,7 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチアの戦争" WI
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "kanji",
       "kanji"
     ],
@@ -107,10 +107,10 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml "クロアチアの戦争 " WI
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "kanji",
       "kanji",
-      "unknown"
+      "null"
     ],
     "checks": [
       3,
@@ -155,10 +155,10 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチアの戦争 " W
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "kanji",
       "kanji",
-      "unknown"
+      "null"
     ],
     "checks": [
       1,
@@ -204,10 +204,10 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチア の戦争 " 
       "katakana",
       "katakana",
       "katakana",
-      "unknown",
+      "null",
       "kanji",
       "kanji",
-      "unknown"
+      "null"
     ],
     "checks": [
       1,
@@ -252,7 +252,7 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチア の戦争 " 
       "katakana",
       "katakana",
       "unknown",
-      "unknown",
+      "null",
       "kanji",
       "unknown"
     ],
