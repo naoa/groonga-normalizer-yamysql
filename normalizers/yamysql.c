@@ -521,7 +521,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
     if (character_length == 0) {
       break;
     }
-
     if (remove_blank_p && character_length == 1 && rest[0] == ' ') {
       if (current_type > types) {
         current_type[-1] |= GRN_CHAR_BLANK;
@@ -529,7 +528,8 @@ normalize(grn_ctx *ctx, grn_obj *string,
       if (current_check) {
         current_check[0]++;
       }
-    } else if (character_length == 1 && (rest[0] == 0x000a || rest[0] == 0x000d)) {
+    } else if (character_length == 1 &&
+               ((rest[0] >= 0x0008 && rest[0] <= 0x000a) || rest[0] == 0x000d)) {
       if (current_check) {
         current_check[0]++;
       }
@@ -599,7 +599,8 @@ normalize(grn_ctx *ctx, grn_obj *string,
       is_removed = GRN_FALSE;
     }
     if (!(character_length == 1 &&
-          (rest[0] == ' ' || rest[0] == 0x000a || rest[0] == 0x000d)
+          (rest[0] == ' ' ||
+           ((rest[0] >= 0x0008 && rest[0] <= 0x000a) || rest[0] == 0x000d))
         )) {
       if (character_length == 6) {
         current_remove_checks += 2;
@@ -1019,7 +1020,7 @@ mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         while ((char_length = grn_plugin_charlen(ctx, token, rest_length, encoding))) {
           is_removed = GRN_FALSE;
 
-          if (token[0] == 0x000a || token[0] == 0x000d) {
+          if ((token[0] >= 0x0008 && token[0] <= 0x000a) || token[0] == 0x000d) {
             token += char_length;
             rest_length -= char_length;
             continue;

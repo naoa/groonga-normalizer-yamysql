@@ -1,0 +1,18 @@
+register normalizers/yamysql
+
+normalize NormalizerYaMySQL 'a\ab' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL 'a\bb' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL 'a\fb' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL 'a\tb' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL 'a\vb' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL 'a\\b' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL 'a\?b' WITH_TYPES|WITH_CHECKS
+
+normalize NormalizerYaMySQLPartofspeechHtml 'a\ab' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLPartofspeechHtml 'a\bb' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLPartofspeechHtml 'a\fb' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLPartofspeechHtml 'a\tb' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLPartofspeechHtml 'a\vb' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLPartofspeechHtml 'a\\b' WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLPartofspeechHtml 'a\?b' WITH_TYPES|WITH_CHECKS
+
