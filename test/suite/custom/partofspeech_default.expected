@@ -8,7 +8,7 @@ normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES
     0.0
   ],
   {
-    "normalized": "これ テスト ",
+    "normalized": "これ テスト 。",
     "types": [
       "hiragana",
       "hiragana",
@@ -16,7 +16,8 @@ normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES
       "katakana",
       "katakana",
       "katakana",
-      "unknown"
+      "unknown",
+      "symbol"
     ],
     "checks": [
       3,
@@ -35,7 +36,10 @@ normalize NormalizerYaMySQLPartofspeech "これはテストです。" WITH_TYPES
       3,
       0,
       0,
-      9
+      6,
+      3,
+      0,
+      0
     ]
   }
 ]
