@@ -119,6 +119,7 @@ normalize NormalizerYaMySQL "おっづ"
 
 ノーマライズ前に``RemovePhrase``テーブルのキーと一致する文字列を削除します。``remove_phrases``テーブルがあるときのみ有効になります。
 特殊機能として、``<remove_html>``をキーに含めておくと``<``と``>``に囲まれる文字列すべてを除去します。``<remove_symbol>``をキーに含めておくと記号すべてを除去します。
+パトリシアトライのLCPサーチを利用しているため、``remove_phrases``テーブルは、``TABLE_PAT_KEY``である必要があります。環境変数``GRN_REMOVE_PHRASE_TABLE_NAME``でテーブル名を変更することができます。
 
 なお、検索時の誤ヒット抑止のため、完全に削除するのではなく、ctypeにNULLが設定されたBLANKに置き換えられます。
 また、この機能は、ビルトインの``TokenMecab``、``TokenDelimit``系トークナイザーでは動作しません。``TokenBigram``系トークナイザーや当方の自作系トークナイザーでは動作します。

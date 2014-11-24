@@ -30,60 +30,6 @@ if test "x$sample_debug" != "xno"; then
   fi
 fi
 
-# MeCab
-AC_ARG_WITH(mecab,
-  [AS_HELP_STRING([--with-mecab],
-    [use MeCab for morphological analysis. [default=yes]])],
-  [with_mecab="$withval"],
-  [with_mecab="yes"])
-AC_MSG_CHECKING([whether enable MeCab])
-AC_MSG_RESULT($with_mecab)
-if test "x$with_mecab" = "xyes"; then
-  # mecab-config
-  AC_ARG_WITH(mecab-config,
-    [AS_HELP_STRING([--with-mecab-config=PATH],
-      [set mecab-config location. [default=auto-detect]])],
-    [if test "$cross_compiling" = "yes"; then
-       MECAB_CONFIG="$withval"
-     else
-       AC_CHECK_FILE("$withval", MECAB_CONFIG="$withval", MECAB_CONFIG=no)
-     fi],
-    [AC_PATH_PROG(MECAB_CONFIG, mecab-config, no)])
-  if test "x$MECAB_CONFIG" = "xno"; then
-    with_mecab="no"
-  else
-    MECAB_CPPFLAGS="-I`$MECAB_CONFIG --inc-dir`"
-    MECAB_LDFLAGS="-L`$MECAB_CONFIG --libs-only-L`"
-    _SAVE_LIBS="$LIBS"
-    _SAVE_LDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS $MECAB_LDFLAGS"
-    AC_SEARCH_LIBS(mecab_new,
-                   mecab,
-                   [MECAB_LIBS="-lmecab $PTHREAD_LIBS"],
-                   [AC_MSG_ERROR("No libmecab found")],
-                   $PTHREAD_LIBS)
-    LDFLAGS="$_SAVE_LDFLAGS"
-    LIBS="$_SAVE_LIBS"
-    _SAVE_CPPFLAGS="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS $MECAB_CPPFLAGS"
-    AC_CHECK_HEADER(mecab.h, , [AC_MSG_ERROR("No mecab.h found")])
-    AC_CHECK_TYPE([mecab_dictionary_info_t],
-                  [AC_DEFINE([HAVE_MECAB_DICTIONARY_INFO_T],
-                             [1],
-                             [Define to 1 if MeCab has the type `mecab_dictionary_info_t'.])],
-                  [],
-                  [[#include <mecab.h>]])
-    CPPFLAGS="$_SAVE_CPPFLAGS"
-    AC_SUBST(MECAB_CPPFLAGS)
-    AC_SUBST(MECAB_LDFLAGS)
-    AC_SUBST(MECAB_LIBS)
-  fi
-fi
-if test "x$with_mecab" = "xyes"; then
-  AC_DEFINE(GRN_WITH_MECAB, [1], [use MeCab])
-fi
-AM_CONDITIONAL(WITH_MECAB, test "x$with_mecab" = "xyes")
-
 GROONGA_REQUIRED_VERSION=3.0.3
 PKG_CHECK_MODULES([GROONGA], [groonga >= ${GROONGA_REQUIRED_VERSION}])
 
@@ -129,9 +75,3 @@ echo "  CFLAGS:                ${GROONGA_CFLAGS}"
 echo "  Libraries:             ${GROONGA_LIBS}"
 echo "  install directory:     ${normalizers_pluginsdir}"
 echo
-echo "MeCab:                   $with_mecab"
-if test "x$with_mecab" = "xyes"; then
-  echo "  CPPLAGS:               ${MECAB_CPPFLAGS}"
-  echo "  LDFLAGS:               ${MECAB_LDFLAGS}"
-  echo "  Libraries:             ${MECAB_LIBS}"
-fi
