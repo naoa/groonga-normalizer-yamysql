@@ -5,8 +5,6 @@
 * ``NormalizerYaMySQL``
 * ``NormalizerYaMySQLKanaCI``
 
-## Default
-
 原則、``NormalizerMySQLUnicodeCI``の正規化ルールで文字列が正規化されます。それに加え、以下の機能をカスタマイズしています。もはやMySQL関係ありません。
 
 ### ``LowercaseAlpha``
@@ -117,7 +115,7 @@ normalize NormalizerYaMySQL "おっづ"
 [[0,0.0,0.0],{"normalized":"おっず","types":[],"checks":[]}]
 ```
 
-## ``RemovePhrase``
+### ``RemovePhrase``
 
 ノーマライズ前に``RemovePhrase``テーブルのキーと一致する文字列を削除します。``remove_phrases``テーブルがあるときのみ有効になります。
 特殊機能として、``<remove_html>``をキーに含めておくと``<``と``>``に囲まれる文字列すべてを除去します。``<remove_symbol>``をキーに含めておくと記号すべてを除去します。
@@ -263,10 +261,9 @@ Build this normalizer.
 ## Dependencies
 
 * Groonga >= 3.0.3
-* MeCab
 
-Install ``mecab``, ``mecab-devel``, ``groonga-devel`` in CentOS/Fedora.
-Install ``mecab``, ``libmecab-dev``, ``libgroonga-dev`` in Debian/Ubuntu.  
+Install ``groonga-devel`` in CentOS/Fedora.
+Install ``libgroonga-dev`` in Debian/Ubuntu.  
 
 See http://groonga.org/docs/install.html
 
@@ -288,25 +285,13 @@ Groonga:
 Mroonga:
 
     mysql> use db;
-    mysql> CREATE TABLE `temp` (id INT NOT NULL) ENGINE=mroonga DEFAULT CHARSET=utf8;
-    mysql> DROP TABLE `temp`;
     mysql> select mroonga_command("register normalizers/yamysql");
     mysql> CREATE TABLE `Diaries` (
         -> id INT NOT NULL,
         -> body TEXT NOT NULL,
         -> PRIMARY KEY (id) USING HASH,
         -> FULLTEXT INDEX (body) COMMENT 'parser "TokenBigram", normalizer "NormalizerYaMySQL'
-        -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
-    mysql> CREATE TABLE `@yamysql_stopwords` (
-        -> stopword VARCHAR(64) NOT NULL,
-        -> PRIMARY KEY (stopword) USING HASH
-        -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
-    mysql> INSERT `@yamysql_stopwords` VALUES("That");
-    mysql> CREATE TABLE `@yamysql_partofspeech` (
-        -> partofspeech VARCHAR(32) NOT NULL,
-        -> PRIMARY KEY (partofspeech) USING HASH
-        -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
-    mysql> INSERT `@yamysql_partofspeech` VALUES("名詞");
+        -> ) ENGINE=Mroonga DEFAULT CHARSET=utf8;
 
 Rroonga:
 
