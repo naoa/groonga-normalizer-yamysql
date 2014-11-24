@@ -1,14 +1,17 @@
 register normalizers/yamysql
 
+table_create remove_phrases TABLE_PAT_KEY ShortText
+load --table remove_phrases
+[
+{"_key": "の"}
+]
+
 table_create text TABLE_NO_KEY
 column_create text text COLUMN_SCALAR LongText
 
-tokenize TokenBigram "時代の歌人" NormalizerYaMySQLPartofspeech --mode ADD
-tokenize TokenBigram "時代の歌人" NormalizerYaMySQLPartofspeech --mode GET
 tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode ADD
 tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode GET
 
-normalize NormalizerYaMySQLPartofspeech "時代の歌人" WITH_TYPES|WITH_CHECKS
 normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
 
 load --table text
@@ -17,7 +20,7 @@ load --table text
 ["時代の歌人"]
 ]
 
-table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLPartofspeech
+table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQL
 
 column_create text-text index COLUMN_INDEX|WITH_POSITION text text
 

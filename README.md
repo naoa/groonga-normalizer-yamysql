@@ -3,26 +3,15 @@
 ## Normalizer
 
 * ``NormalizerYaMySQL``
-* ``NormalizerYaMySQLHtml``
-* ``NormalizerYaMySQLSymbol``
-* ``NormalizerYaMySQLSymbolHtml``
-* ``NormalizerYaMySQLPartofspeech``
-* ``NormalizerYaMySQLPartofspeechHtml``
-* ``NormalizerYaMySQLSymbolPartofspeech``
-* ``NormalizerYaMySQLSymbolPartofspeechHtml``
 * ``NormalizerYaMySQLKanaCI``
-* ``NormalizerYaMySQLKanaCIHtml``
-* ``NormalizerYaMySQLKanaCISymbol``
-* ``NormalizerYaMySQLKanaCISymbolHtml``
-* ``NormalizerYaMySQLKanaCIPartofspeech``
-* ``NormalizerYaMySQLKanaCIPartofspeechHtml``
-* ``NormalizerYaMySQLKanaCISymbolPartofspeech``
-* ``NormalizerYaMySQLKanaCISymbolPartofspeechHtml``
-
 
 ## Default
 
-原則、``NormalizerMySQLUnicodeCI``の正規化ルールで文字列が正規化されます。それに加え、以下の機能をカスタマイズしています。ノーマライザー名に含まれていない以下の機能は全て有効になっておりカスタマイズすることはできません。
+原則、``NormalizerMySQLUnicodeCI``の正規化ルールで文字列が正規化されます。それに加え、以下の機能をカスタマイズしています。もはやMySQL関係ありません。
+
+### ``LowercaseAlpha``
+
+* アルファベットを大文字ではなく、小文字に正規化します。
 
 ### ``ExceptKatakana``
 
@@ -40,9 +29,14 @@ normalize NormalizerMySQLUnicodeCI "データベース"
 [[0,0.0,0.0],{"normalized":"てーたへーす","types":[],"checks":[]}]
 ```
 
-### ``ExceptKanaCI``
+### ``KanaCI``
 
-* ひらがなカタカナ小文字は大文字に正規化しません。
+* ひらがなカタカナ小文字を大文字に正規化します。
+
+```
+normalize NormalizerYaMySQLKanaCI "フィルム"
+[[0,0.0,0.0],{"normalized":"フイルム","types":[],"checks":[]}]
+```
 
 ```
 normalize NormalizerYaMySQL "フィルム"
@@ -123,86 +117,76 @@ normalize NormalizerYaMySQL "おっづ"
 [[0,0.0,0.0],{"normalized":"おっず","types":[],"checks":[]}]
 ```
 
-## Option
+## ``RemovePhrase``
 
-以下の機能は、対応する名前が付与されたノーマライザーでのみ有効になります。  
-ストップワードの機能は、あらかじめ所定のテーブルを作成しなければ動作しません。
-なお、以下の機能のうち、``KanaCI``以外の機能は、ビルトインの``TokenMecab``、``TokenDelimit``系トークナイザーでは動作しません。``TokenBigram``系トークナイザーや当方の自作系トークナイザーでは動作します。
+ノーマライズ前に``RemovePhrase``テーブルのキーと一致する文字列を削除します。``remove_phrases``テーブルがあるときのみ有効になります。
+特殊機能として、``<remove_html>``をキーに含めておくと``<``と``>``に囲まれる文字列すべてを除去します。``<remove_symbol>``をキーに含めておくと記号すべてを除去します。
+
+なお、検索時の誤ヒット抑止のため、完全に削除するのではなく、ctypeにNULLが設定されたBLANKに置き換えられます。
+また、この機能は、ビルトインの``TokenMecab``、``TokenDelimit``系トークナイザーでは動作しません。``TokenBigram``系トークナイザーや当方の自作系トークナイザーでは動作します。
 
 ノーマライザーでのフィルター機能は、トークナイザーでフィルターするのに比べ処理負荷が大きくなりますが、検索時とスニペット時で検索ワードが異なることがなく、適切なスニペットを行うことができます。  
 なお、現状、Groonga組み込みの[snippet_html](http://groonga.org/ja/docs/reference/functions/snippet_html.html)関数では、``NormalizerAuto``ノーマライザーしか利用されません。   
 自作の[snippet_tritonn](https://github.com/naoa/groonga-function-snippet_tritonn)関数を使えば、スニペットに利用するノーマライザーを指定することができます。  
 
-### ``KanaCI``
-
-* ひらがなカタカナ小文字を大文字に正規化します。
-
-```
-normalize NormalizerYaMySQLKanaCI "フィルム"
-[[0,0.0,0.0],{"normalized":"フイルム","types":[],"checks":[]}]
-```
-
-### ``Html``
-
-* HTMLタグを除去します。
-
-```
-normalize NormalizerYaMySQLHtml "<b>テスト</b>"
-[[0,0.0,0.0],{"normalized":"テスト","types":[],"checks":[]}]
-```
-
-壊れたタグがあると、必要以上に除去される可能性があるので注意が必要です。
-
-### ``Symbol``
-
-* 記号を除去します。
-
-```
-normalize NormalizerYaMySQLSymbol "It's test data!"
-[[0,0.0,0.0],{"normalized":"ITS TEST DATA","types":[],"checks":[]}]
-```
-
-ノーマライザー側で記号を除去すると文区切りまで除去されるため、一つ前の文の末尾と一つ後の文の先頭で意味のある単語になりやすいです。Ngramトークナイザーを組み合わせると、誤ヒットに繋がり易いため、注意が必要です。Ngramトークナイザーで記号を除去する場合は、Stopwordsテーブルを使って文区切りにならない記号のみを選択的に除去するかトークナイザー以降の処理で除去したほうがいいと思います。
-
-### ``Partofspeech``
-
-* Mecabで分かち書きをし、所定の品詞を除去します。
-
-デフォルトでは、以下の品詞が除去されます。
-
-``助詞``、``助動詞``、``連体詞``、``接続詞``
-
-除外対象の品詞が格納されたテーブル``@yamysql_partofspeech``がある場合、そちらの品詞が除去されます。
-
-```
-table_create @yamysql_partofspeech TABLE_HASH_KEY ShortText
-load --table @yamysql_partofspeech
+```bash
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+table_create remove_phrases TABLE_PAT_KEY ShortText
+[[0,0.0,0.0],true]
+load --table remove_phrases
 [
-{"_key": "名詞"}
-]
-normalize NormalizerYaMySQLPartofspeech "これはテストです。"
-[[0,0.0,0.0],{"normalized": "はです。","types": [],"checks": []}]
-```
-
-### ``Stopwords``
-
-* Mecabで分かち書きをし、所定の単語を除去します。
-
-``Stopwords``の機能を使うには、あらかじめ除外対象の語句が格納されたテーブル``@yamysql_stopwords``を作る必要があります。
-整合性を保つため、除外対象の語句を追加した場合は、インデックス再構築が必要です。  
-除外対象の語句は、ノーマライズ前のワードを登録する必要があります。
-
-```
-table_create @yamysql_stopwords TABLE_HASH_KEY ShortText
-load --table @yamysql_stopwords
-[
+{"_key": "<remove_symbol>"},
+{"_key": "<remove_html>"},
 {"_key": "テスト"}
 ]
-normalize NormalizerYaMySQL "これはテストです。"
-[[0,0.0,0.0],{"normalized": "これはです。","types": [],"checks": []}]
+[[0,0.0,0.0],3]
+normalize NormalizerYaMySQL "**これは<b>テスト</b>です。" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": " これは です ",
+    "types": [
+      "null",
+      "hiragana",
+      "hiragana",
+      "hiragana",
+      "null",
+      "hiragana",
+      "hiragana",
+      "null"
+    ],
+    "checks": [
+      2,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      16,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3
+    ]
+  }
+]
 ```
 
 ## Install
+
+未作成
 
 Install ``groonga-normalizer-yamysql`` package:
 

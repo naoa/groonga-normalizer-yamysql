@@ -1,8 +1,16 @@
 register normalizers/yamysql
 
-normalize NormalizerYaMySQLSymbolPartofspeechHtml "クロアチア の戦争" WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチアの戦争" WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQLSymbolPartofspeechHtml "クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチア の戦争 " WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQLSymbolPartofspeechHtml " クロアチア の戦争 " REMOVE_BLANK|WITH_TYPES|WITH_CHECKS
+table_create remove_phrases TABLE_PAT_KEY ShortText
+load --table remove_phrases
+[
+{"_key": "の"}
+]
+
+normalize NormalizerYaMySQL "クロアチア の戦争" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL " クロアチアの戦争" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL "クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL "クロアチアののの戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL " クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL " クロアチア の戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL " クロアチア の 戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL " クロアチア の戦争 " REMOVE_BLANK|WITH_TYPES|WITH_CHECKS

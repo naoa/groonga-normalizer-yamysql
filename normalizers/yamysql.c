@@ -51,8 +51,6 @@
 #include "mysql_custom_kana_ci_table.h"
 #include "mysql_custom_table.h"
 
-#include <mecab.h>
-
 #ifdef __GNUC__
 #  define GNUC_UNUSED __attribute__((__unused__))
 #else
@@ -66,157 +64,11 @@
 
 #define SNIPPET_BUFFER_SIZE 256
 
-static mecab_t *sole_mecab = NULL;
-static grn_plugin_mutex *sole_mecab_mutex = NULL;
-static grn_encoding sole_mecab_encoding = GRN_ENC_NONE;
+#define REMOVE_PHRASE_TABLE_NAME "remove_phrases"
+#define REMOVE_SYMBOL_TAG "<remove_symbol>"
+#define REMOVE_HTML_TAG "<remove_html>"
 
-#define DEFAULT_MECAB_PARSE_LIMIT 1200000
-#define DEFAULT_RFIND_PUNCT_OFFSET 300
-
-#define STOPWORDS_TABLE_NAME "@yamysql_stopwords"
-#define STOPWORDS_TABLE_NAME_MRN "@0040yamysql_stopwords"
-#define PARTOFSPEECH_TABLE_NAME "@yamysql_partofspeech"
-#define PARTOFSPEECH_TABLE_NAME_MRN "@0040yamysql_partofspeech"
-
-static grn_hash *default_pos_table = NULL;
-
-static grn_encoding
-translate_mecab_charset_to_grn_encoding(const char *charset)
-{
-  if (strcasecmp(charset, "euc-jp") == 0) {
-    return GRN_ENC_EUC_JP;
-  } else if (strcasecmp(charset, "utf-8") == 0 ||
-             strcasecmp(charset, "utf8") == 0) {
-    return GRN_ENC_UTF8;
-  } else if (strcasecmp(charset, "shift_jis") == 0 ||
-             strcasecmp(charset, "shift-jis") == 0 ||
-             strcasecmp(charset, "sjis") == 0) {
-    return GRN_ENC_SJIS;
-  }
-  return GRN_ENC_NONE;
-}
-
-static grn_encoding
-get_mecab_encoding(mecab_t *mecab)
-{
-  grn_encoding encoding = GRN_ENC_NONE;
-  const mecab_dictionary_info_t *dictionary_info;
-  dictionary_info = mecab_dictionary_info(mecab);
-  if (dictionary_info) {
-    const char *charset = dictionary_info->charset;
-    encoding = translate_mecab_charset_to_grn_encoding(charset);
-  }
-  return encoding;
-}
-
-static int
-rfind_punct(grn_ctx *ctx, grn_encoding encoding,
-            const char *string, int start, int offset_limit, int end)
-{
-  int punct_position;
-  int char_length;
-  const char *string_top;
-  const char *string_tail;
-
-  if (offset_limit < start) {
-    offset_limit = start;
-  }
-  string_top = string + offset_limit;
-
-  for (string_tail = string + end;
-       string_tail > string_top; string_tail -= char_length) {
-    char_length = grn_plugin_charlen(ctx, (char *)string_tail,
-                                     end - start, encoding);
-    if (string_tail + char_length &&
-        (ispunct(*string_tail) ||
-         !memcmp(string_tail, "。", char_length) ||
-         !memcmp(string_tail, "、", char_length) )) {
-      break;
-    }
-  }
-  punct_position = string_tail - string;
-  if (punct_position <= start) {
-    punct_position = end;
-  }
-  return punct_position;
-}
-
-static int
-check_euc(const unsigned char *x, int y)
-{
-  const unsigned char *p;
-  for (p = x + y - 1; p >= x && *p >= 0x80U; p--);
-  return (int) ((x + y - p) & 1);
-}
-
-static int
-check_sjis(const unsigned char *x, int y)
-{
-  const unsigned char *p;
-  for (p = x + y - 1; p >= x; p--)
-  if ((*p < 0x81U) || (*p > 0x9fU && *p < 0xe0U) || (*p > 0xfcU))
-    break;
-  return (int) ((x + y - p) & 1);
-}
-
-static int
-rfind_lastbyte(GNUC_UNUSED grn_ctx *ctx, grn_encoding encoding,
-               const char *string, int offset)
-{
-  switch (encoding) {
-  case GRN_ENC_EUC_JP:
-    while (!(check_euc((unsigned char *) string, offset))) {
-      offset -= 1;
-    }
-    break;
-  case GRN_ENC_SJIS:
-    while (!(check_sjis((unsigned char *) string, offset))) {
-      offset -= 1;
-    }
-    break;
-  case GRN_ENC_UTF8:
-    while (offset && string[offset] <= (char)0xc0) {
-      offset -= 1;
-    }
-    break;
-  default:
-    break;
-  }
-  return offset;
-}
-
-static const mecab_node_t*
-split_mecab_sparse_node(grn_ctx *ctx, mecab_t *mecab, grn_encoding encoding,
-                        unsigned int parse_limit, unsigned int rfind_punct_offset,
-                        const char *string, unsigned int string_length,
-                        unsigned int *parsed_string_length)
-{
-  const mecab_node_t *node;
-  if (string_length < parse_limit) {
-    node = mecab_sparse_tonode2(mecab, string, string_length);
-    *parsed_string_length = string_length;
-  } else {
-    int splitted_string_end = parse_limit;
-    unsigned int splitted_string_length;
-    int punct_position = 0;
-    splitted_string_end = rfind_lastbyte(ctx, encoding,
-                                         string,
-                                         splitted_string_end);
-    if (splitted_string_end == 0) {
-      splitted_string_end = parse_limit;
-    }
-    punct_position = rfind_punct(ctx, encoding,
-                                 string,
-                                 0,
-                                 splitted_string_end - rfind_punct_offset,
-                                 splitted_string_end);
-    splitted_string_length = punct_position;
-    node = mecab_sparse_tonode2(mecab, string, splitted_string_length);
-    *parsed_string_length = splitted_string_length;
-  }
-  return node;
-}
-
+#define MAX_N_HITS 1024
 
 typedef grn_bool (*normalizer_func)(grn_ctx *ctx,
                                     const char *utf8,
@@ -528,11 +380,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
       if (current_check) {
         current_check[0]++;
       }
-    } else if (character_length == 1 &&
-               ((rest[0] >= 0x0008 && rest[0] <= 0x000a) || rest[0] == 0x000d)) {
-      if (current_check) {
-        current_check[0]++;
-      }
     } else if (remove_checks && remove_checks[current_remove_checks]) {
       if (!is_removed) {
         normalized[normalized_length_in_bytes] = ' ';
@@ -598,16 +445,7 @@ normalize(grn_ctx *ctx, grn_obj *string,
       }
       is_removed = GRN_FALSE;
     }
-    if (!(character_length == 1 &&
-          (rest[0] == ' ' ||
-           ((rest[0] >= 0x0008 && rest[0] <= 0x000a) || rest[0] == 0x000d))
-        )) {
-      if (character_length == 6) {
-        current_remove_checks += 2;
-      } else {
-        current_remove_checks++;
-      }
-    }
+    current_remove_checks++;
     rest += character_length;
     rest_length -= character_length;
   }
@@ -842,37 +680,67 @@ custom_normalizer(
   return custom_normalized;
 }
 
-static grn_bool
-execute_token_filter(grn_ctx *ctx, const char *token, unsigned int token_length,
-                     const char *pos, unsigned int pos_length,
-                     grn_obj *stopwords_table, grn_obj *pos_table)
-{
-  if (stopwords_table) {
-    grn_id id;
-    id = grn_table_get(ctx, stopwords_table, token, token_length);
-    if (id) { return GRN_TRUE; }
-  }
-  if (pos_table) {
-    grn_id id;
-    id = grn_table_get(ctx, pos_table, pos, pos_length);
-    if (id) { return GRN_TRUE; }
-  }
-  return GRN_FALSE;
-}
-
 static unsigned int
 char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
             grn_encoding encoding, grn_bool *remove_checks,
-            grn_bool filter_symbol, grn_bool filter_html)
+            grn_obj *table, grn_pat_scan_hit *hits)
 {
   unsigned int char_length;
   unsigned int current_char = 0;
   unsigned int rest_length = string_length;
   grn_bool in_tag = GRN_FALSE;
+  const char *string_end = string + string_length;
+  const char *scan_start;
+  const char *scan_rest = string;
+  unsigned int nhits = 0;
+  unsigned int current_hit = 0;
+  unsigned int current_phrase = 0;
+  grn_bool in_phrase = GRN_FALSE;
+  grn_bool remove_symbol = GRN_FALSE;
+  grn_bool remove_html = GRN_FALSE;
+
+  {
+    grn_id id;
+    id = grn_table_get(ctx, table, REMOVE_SYMBOL_TAG, strlen(REMOVE_SYMBOL_TAG));
+    if (id) {
+      remove_symbol = GRN_TRUE;
+    }
+  }
+  {
+    grn_id id;
+    id = grn_table_get(ctx, table, REMOVE_HTML_TAG, strlen(REMOVE_HTML_TAG));
+    if (id) {
+      remove_html = GRN_TRUE;
+    }
+  }
 
   while ((char_length = grn_plugin_charlen(ctx, string, rest_length, encoding))) {
     grn_bool is_removed = GRN_FALSE;
-    if (filter_html) {
+    if (current_hit >= nhits) {
+      scan_start = scan_rest;
+      unsigned int scan_rest_length = string_end - scan_rest;
+      if (scan_rest_length > 0) {
+        nhits = grn_pat_scan(ctx, (grn_pat *)table,
+                             scan_rest,
+                             scan_rest_length,
+                             hits, MAX_N_HITS, &scan_rest); 
+        current_hit = 0;
+      }
+    }
+    if (nhits > 0 && current_hit < nhits &&
+        string - scan_start == hits[current_hit].offset) {
+       in_phrase = GRN_TRUE;
+       is_removed = GRN_TRUE;
+       current_phrase = 0;
+    }
+    current_phrase += char_length;
+    if (in_phrase && current_phrase == hits[current_hit].length) {
+      in_phrase = GRN_FALSE;
+      is_removed = GRN_TRUE;
+      current_phrase = 0;
+      current_hit++;
+    }
+    if (remove_html) {
       switch (string[0]) {
         case '<' :
           in_tag = GRN_TRUE;
@@ -886,13 +754,15 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
           break;
       }
     }
-    if (filter_symbol) {
+    if (remove_symbol) {
       if (grn_nfkc_char_type((unsigned char *)string) == GRN_CHAR_SYMBOL) {
         is_removed = GRN_TRUE;
       }
     }
-    if (filter_html && in_tag) {
+    if (remove_html && in_tag) {
       remove_checks[current_char] = in_tag;
+    } else if (table && in_phrase) {
+      remove_checks[current_char] = in_phrase;
     } else {
       remove_checks[current_char] = is_removed;
     }
@@ -904,184 +774,20 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
   return current_char;
 }
 
-static unsigned int
-mecab_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
-             grn_encoding encoding, grn_bool *remove_checks,
-             grn_obj *stopwords_table, grn_obj *pos_table,
-             grn_bool filter_symbol, grn_bool filter_html)
-{
-  mecab_t *mecab;
-  const mecab_node_t *node;
-  unsigned int parse_limit = DEFAULT_MECAB_PARSE_LIMIT;
-  unsigned int rfind_punct_offset = DEFAULT_RFIND_PUNCT_OFFSET;
-  const char *rest_string;
-  unsigned int rest_string_length;
-  unsigned int current_char = 0;
-  grn_bool in_tag = GRN_FALSE;
-
-  if (!sole_mecab) {
-    grn_plugin_mutex_lock(ctx, sole_mecab_mutex);
-    if (!sole_mecab) {
-      sole_mecab = mecab_new2("-Owakati");
-      if (!sole_mecab) {
-        GRN_PLUGIN_ERROR(ctx, GRN_NORMALIZER_ERROR,
-                         "[normalizer][yamysql] "
-                         "mecab_new2() failed on yamysql_init(): %s",
-                         mecab_strerror(NULL));
-      } else {
-        sole_mecab_encoding = get_mecab_encoding(sole_mecab);
-      }
-    }
-    grn_plugin_mutex_unlock(ctx, sole_mecab_mutex);
-  }
-  if (!sole_mecab) {
-    return GRN_FALSE;
-  }
-  if (encoding != sole_mecab_encoding) {
-    GRN_PLUGIN_ERROR(ctx, GRN_NORMALIZER_ERROR,
-                     "[normalizer][yamysql] "
-                     "MeCab dictionary charset (%s) does not match "
-                     "the table encoding: <%s>",
-                     grn_encoding_to_string(sole_mecab_encoding),
-                     grn_encoding_to_string(encoding));
-    return GRN_FALSE;
-  }
-  mecab = sole_mecab;
-
-  rest_string_length = string_length;
-  rest_string = string;
-
-  grn_plugin_mutex_lock(ctx, sole_mecab_mutex);
-
-  while (rest_string_length) {
-#define MECAB_PARSE_MIN 4096
-    unsigned int parsed_string_length;
-    grn_bool is_success = GRN_FALSE;
-    while (!is_success) {
-      node = split_mecab_sparse_node(ctx, mecab,
-                                     encoding,
-                                     parse_limit,
-                                     rfind_punct_offset,
-                                     rest_string,
-                                     rest_string_length,
-                                     &parsed_string_length);
-      if (!node) {
-        parse_limit /= 2;
-        GRN_PLUGIN_LOG(ctx, GRN_LOG_NOTICE,
-                       "[normalizer][yamysql] "
-                       "mecab_sparse_tonode() failed len=%d err=%s do retry",
-                       parsed_string_length,
-                       mecab_strerror(mecab));
-      } else {
-        node = node->next;
-        rest_string_length -= parsed_string_length;
-        rest_string += parsed_string_length;
-        is_success = GRN_TRUE;
-      }
-      if (parse_limit < MECAB_PARSE_MIN) {
-        break;
-      }
-    }
-    if (!node) {
-      GRN_PLUGIN_ERROR(ctx, GRN_NORMALIZER_ERROR,
-                       "[normalizer][yamysql] "
-                       "mecab_sparse_tonode() failed len=%d err=%s",
-                       parsed_string_length,
-                       mecab_strerror(mecab));
-      return GRN_FALSE;
-    }
-
-    for (; node; node = node->next) {
-      if (node->stat == MECAB_NOR_NODE || node->stat == MECAB_UNK_NODE) {
-        unsigned int char_length;
-        char *token = (char *)node->surface;
-        unsigned int rest_length = node->length;
-        char *feature = (char *)node->feature;
-        unsigned int feature_rest_length = strlen(feature);
-        const char *delimiter = ",";
-        unsigned int pos_length = 0;
-        grn_bool is_removed = GRN_FALSE;
-        grn_bool is_token_removed = GRN_FALSE;
-
-        while ((char_length = grn_plugin_charlen(ctx, feature, feature_rest_length, encoding))) {
-          if (feature + char_length && !memcmp(feature, delimiter, char_length)) {
-            break;
-          }
-          pos_length += char_length;
-          feature += char_length;
-          feature_rest_length -= char_length;
-        }
-        if (execute_token_filter(ctx, node->surface, node->length,
-                                 node->feature, pos_length,
-                                 stopwords_table, pos_table)) {
-          is_token_removed = GRN_TRUE;
-        } 
-
-        while ((char_length = grn_plugin_charlen(ctx, token, rest_length, encoding))) {
-          is_removed = GRN_FALSE;
-
-          if ((token[0] >= 0x0008 && token[0] <= 0x000a) || token[0] == 0x000d) {
-            token += char_length;
-            rest_length -= char_length;
-            continue;
-          }
-          if (filter_html) {
-            switch (token[0]) {
-              case '<' :
-                in_tag = GRN_TRUE;
-                is_removed = GRN_TRUE;
-                break;
-              case '>' :
-                in_tag = GRN_FALSE;
-                is_removed = GRN_TRUE;
-                break;
-              default :
-                break;
-            }
-          }
-          if (is_token_removed && is_removed == GRN_FALSE) {
-            is_removed = GRN_TRUE;
-          }
-          if (filter_symbol && is_removed == GRN_FALSE) {
-            if (grn_nfkc_char_type((unsigned char *)token) == GRN_CHAR_SYMBOL) {
-              is_removed = GRN_TRUE;
-            }
-          }
-          
-          if (filter_html && in_tag == GRN_TRUE) {
-            remove_checks[current_char] = in_tag;
-          } else {
-            remove_checks[current_char] = is_removed;
-          }
-          current_char++;
-          token += char_length;
-          rest_length -= char_length;
-        }
-      }
-    }
-#undef MECAB_PARSE_MIN
-  }
-  grn_plugin_mutex_unlock(ctx, sole_mecab_mutex);
-
-  return current_char;
-}
-
 static grn_obj *
 mysql_unicode_ci_custom_next(
   GNUC_UNUSED grn_ctx *ctx,
   GNUC_UNUSED int nargs,
   grn_obj **args,
-  GNUC_UNUSED grn_user_data *user_data)
+  GNUC_UNUSED grn_user_data *user_data,
+  grn_bool kana_ci)
 {
   grn_obj *string = args[0];
   grn_encoding encoding;
   const char *normalizer_type_label = "yamysql";
   int flags;
-  grn_bool filter_symbol = GRN_FALSE;
-  grn_bool filter_pos = GRN_FALSE;
-  grn_bool filter_html = GRN_FALSE;
-  grn_bool kana_ci = GRN_FALSE;
-  grn_obj *var; 
+  grn_obj *table = NULL;
+  grn_pat_scan_hit *hits = NULL;
   grn_bool *remove_checks = NULL;
 
   encoding = grn_string_get_encoding(ctx, string);
@@ -1094,83 +800,48 @@ mysql_unicode_ci_custom_next(
                      grn_encoding_to_string(encoding));
     return NULL;
   }
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_symbol", -1); 
-  if (GRN_TEXT_LEN(var) != 0) { 
-    filter_symbol = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_html", -1); 
-  if (GRN_TEXT_LEN(var) != 0) { 
-    filter_html = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_pos", -1); 
-  if (GRN_TEXT_LEN(var) != 0) { 
-    filter_pos = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "kana_ci", -1); 
-  if (GRN_TEXT_LEN(var) != 0) { 
-    kana_ci = GRN_BOOL_VALUE(var);
-  }
 
   flags = grn_string_get_flags(ctx, string);
 
   //キー操作のWITH_NORMALIZEでノーマライザーが呼ばれた場合は、フィルター処理は動作しないようにする。
   //TokenMecab、TokenDelimitではflagがなく区別できないため、フィルター処理は常に動作しない。
   if (flags) {
-    grn_obj *stopwords_table = NULL;
-    grn_obj *pos_table = NULL;
     const char *original_string = NULL;
     unsigned int original_length_in_bytes = 0;
     unsigned int max_remove_checks_size = 0;
-
-    stopwords_table = grn_ctx_get(ctx,
-                                  STOPWORDS_TABLE_NAME,
-                                  strlen(STOPWORDS_TABLE_NAME));
-    if (!stopwords_table) {
-      stopwords_table = grn_ctx_get(ctx,
-                                    STOPWORDS_TABLE_NAME_MRN,
-                                    strlen(STOPWORDS_TABLE_NAME_MRN));
+    const char *table_name_env;
+    table_name_env = getenv("GRN_REMOVE_PHRASE_TABLE_NAME");
+    
+    if (table_name_env) {
+      table = grn_ctx_get(ctx,
+                          table_name_env,
+                          strlen(table_name_env));
+    } else {
+      table = grn_ctx_get(ctx,
+                          REMOVE_PHRASE_TABLE_NAME,
+                          strlen(REMOVE_PHRASE_TABLE_NAME));
     }
-    if (filter_pos) {
-      pos_table = grn_ctx_get(ctx,
-                              PARTOFSPEECH_TABLE_NAME,
-                              strlen(PARTOFSPEECH_TABLE_NAME));
-      if (!pos_table) {
-        pos_table = grn_ctx_get(ctx,
-                                PARTOFSPEECH_TABLE_NAME_MRN,
-                                strlen(PARTOFSPEECH_TABLE_NAME_MRN));
+    if (table) {
+      if (!(hits = GRN_PLUGIN_MALLOC(ctx, sizeof(grn_pat_scan_hit) * MAX_N_HITS))) {
+        GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
+                         "[normalizer][yamysql] "
+                         "memory allocation to grn_pat_scan_hit failed");
+        table = NULL;
+        grn_obj_unlink(ctx, table);
+        return NULL;
       }
+    } else {
+      table = NULL;
     }
-
-    if (filter_pos || stopwords_table || filter_symbol || filter_html) {
+    if (table) {
       grn_string_get_original(ctx, string, &original_string, &original_length_in_bytes);
       max_remove_checks_size = sizeof(grn_bool) * original_length_in_bytes + 1;
       remove_checks = GRN_PLUGIN_MALLOC(ctx, max_remove_checks_size);
-    }
 
-    if (filter_pos && pos_table) {
-      mecab_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
-                   stopwords_table, pos_table, filter_symbol, filter_html);
-    } else if (filter_pos && default_pos_table) {
-      mecab_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
-                   stopwords_table, (grn_obj *)default_pos_table, filter_symbol, filter_html);
-    } else if (stopwords_table) {
-      mecab_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
-                   stopwords_table, NULL, filter_symbol, filter_html);
-    } else if (filter_symbol || filter_html) {
       char_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
-                  filter_symbol, filter_html);
-    }
-
-    if (pos_table) {
-      grn_obj_unlink(ctx, pos_table);
-      pos_table = NULL;
-    }
-    if (stopwords_table) {
-      grn_obj_unlink(ctx, stopwords_table);
-      stopwords_table = NULL;
+                  table, hits);
     }
   }
-
   if (kana_ci) {
     normalize(ctx, string,
               normalizer_type_label,
@@ -1184,7 +855,11 @@ mysql_unicode_ci_custom_next(
               custom_normalizer,
               remove_checks);
   }
-
+  if (table) {
+    grn_obj_unlink(ctx, table);
+    GRN_PLUGIN_FREE(ctx, hits);
+    table = NULL;
+  }
   if (remove_checks) {
     GRN_PLUGIN_FREE(ctx, remove_checks);
     remove_checks = NULL;
@@ -1193,171 +868,40 @@ mysql_unicode_ci_custom_next(
   return NULL;
 }
 
-static void
-check_mecab_dictionary_encoding(GNUC_UNUSED grn_ctx *ctx)
+static grn_obj *
+mysql_unicode_ci_custom(
+  GNUC_UNUSED grn_ctx *ctx,
+  GNUC_UNUSED int nargs,
+  grn_obj **args,
+  GNUC_UNUSED grn_user_data *user_data)
 {
-#ifdef HAVE_MECAB_DICTIONARY_INFO_T
-  mecab_t *mecab;
+  return mysql_unicode_ci_custom_next(ctx, nargs, args, user_data, GRN_FALSE);
+}
 
-  mecab = mecab_new2("-Owakati");
-  if (mecab) {
-    grn_encoding encoding;
-    int have_same_encoding_dictionary = 0;
-
-    encoding = GRN_CTX_GET_ENCODING(ctx);
-    have_same_encoding_dictionary = encoding == get_mecab_encoding(mecab);
-    mecab_destroy(mecab);
-
-    if (!have_same_encoding_dictionary) {
-      GRN_PLUGIN_ERROR(ctx, GRN_NORMALIZER_ERROR,
-                       "[normalizer][yamysql] "
-                       "MeCab has no dictionary that uses the context encoding"
-                       ": <%s>",
-                       grn_encoding_to_string(encoding));
-    }
-  } else {
-    GRN_PLUGIN_ERROR(ctx, GRN_NORMALIZER_ERROR,
-                     "[normalizer][yamysql] "
-                     "mecab_new2 failed in check_mecab_dictionary_encoding: %s",
-                     mecab_strerror(NULL));
-  }
-#endif
+static grn_obj *
+mysql_unicode_ci_custom_kana_ci(
+  GNUC_UNUSED grn_ctx *ctx,
+  GNUC_UNUSED int nargs,
+  grn_obj **args,
+  GNUC_UNUSED grn_user_data *user_data)
+{
+  return mysql_unicode_ci_custom_next(ctx, nargs, args, user_data, GRN_TRUE);
 }
 
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
-  sole_mecab = NULL;
-  sole_mecab_mutex = grn_plugin_mutex_open(ctx);
-  if (!sole_mecab_mutex) {
-    GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
-                     "[normalizer][yamysql] grn_plugin_mutex_open() failed");
-    return ctx->rc;
-  }
-
-  check_mecab_dictionary_encoding(ctx);
-
-  default_pos_table = grn_hash_create(ctx, NULL,
-                                      GRN_TABLE_MAX_KEY_SIZE,
-                                      0,
-                                      GRN_OBJ_TABLE_HASH_KEY|GRN_OBJ_KEY_VAR_SIZE);
-  if (default_pos_table) {
-    grn_hash_add(ctx, default_pos_table, "助詞", strlen("助詞"), NULL, NULL);
-    grn_hash_add(ctx, default_pos_table, "助動詞", strlen("助動詞"), NULL, NULL);
-    grn_hash_add(ctx, default_pos_table, "連体詞", strlen("連体詞"), NULL, NULL);
-    grn_hash_add(ctx, default_pos_table, "接続詞", strlen("接続詞"), NULL, NULL);
-  }
-
   return ctx->rc;
 }
 
 grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  grn_expr_var vars[5];
+  grn_normalizer_register(ctx, "NormalizerYaMySQL", -1,
+                          NULL, mysql_unicode_ci_custom, NULL);
 
-  grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
-  grn_plugin_expr_var_init(ctx, &vars[1], "filter_symbol", -1);
-  grn_plugin_expr_var_init(ctx, &vars[2], "filter_html", -1);
-  grn_plugin_expr_var_init(ctx, &vars[3], "filter_pos", -1);
-  grn_plugin_expr_var_init(ctx, &vars[4], "kana_ci", -1);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[2].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[3].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-
-  grn_proc_create(ctx, "NormalizerYaMySQL", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCI", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[2].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-  grn_proc_create(ctx, "NormalizerYaMySQLHtml", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCIHtml", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[2].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-  grn_proc_create(ctx, "NormalizerYaMySQLSymbol", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbol", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[2].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-  grn_proc_create(ctx, "NormalizerYaMySQLSymbolHtml", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbolHtml", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[2].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[3].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-  grn_proc_create(ctx, "NormalizerYaMySQLPartofspeech", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLSymbolPartofspeech", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCIPartofspeech", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbolPartofspeech", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[2].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[3].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-  grn_proc_create(ctx, "NormalizerYaMySQLPartofspeechHtml", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLSymbolPartofspeechHtml", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCIPartofspeechHtml", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
-
-  GRN_BOOL_SET(ctx, &vars[1].value, GRN_TRUE);
-  grn_proc_create(ctx, "NormalizerYaMySQLKanaCISymbolPartofspeechHtml", -1,
-                  GRN_PROC_NORMALIZER,
-                  NULL, mysql_unicode_ci_custom_next, NULL, 5, vars);
+  grn_normalizer_register(ctx, "NormalizerYaMySQLKanaCI", -1,
+                          NULL, mysql_unicode_ci_custom_kana_ci, NULL);
 
   return GRN_SUCCESS;
 }
@@ -1365,18 +909,5 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
 {
-  if (sole_mecab) {
-    mecab_destroy(sole_mecab);
-    sole_mecab = NULL;
-  }
-  if (sole_mecab_mutex) {
-    grn_plugin_mutex_close(ctx, sole_mecab_mutex);
-    sole_mecab_mutex = NULL;
-  }
-  if (default_pos_table) {
-    grn_hash_close(ctx, default_pos_table);
-    default_pos_table = NULL;
-  }
-
   return GRN_SUCCESS;
 }

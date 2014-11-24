@@ -1,4 +1,12 @@
 register normalizers/yamysql
 
-normalize NormalizerYaMySQLSymbolPartofspeechHtml "**これは<b>テスト</b>データーです。" WITH_TYPES|WITH_CHECKS
+table_create remove_phrases TABLE_PAT_KEY ShortText
+load --table remove_phrases
+[
+{"_key": "<remove_symbol>"},
+{"_key": "<remove_html>"},
+{"_key": "テスト"}
+]
+
+normalize NormalizerYaMySQL "**これは<b>テスト</b>です。" WITH_TYPES|WITH_CHECKS
 

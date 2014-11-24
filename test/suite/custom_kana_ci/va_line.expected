@@ -1,4 +1,0 @@
-register normalizers/yamysql
-[[0,0.0,0.0],true]
-normalize NormalizerYaMySQLKanaCI "ヴァヴィヴヴェヴォ"
-[[0,0.0,0.0],{"normalized":"バビブベボ","types":[],"checks":[]}]

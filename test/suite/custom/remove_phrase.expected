@@ -1,0 +1,38 @@
+register normalizers/yamysql
+[[0,0.0,0.0],true]
+table_create remove_phrases TABLE_PAT_KEY ShortText
+[[0,0.0,0.0],true]
+load --table remove_phrases
+[
+{"_key": "テスト"}
+]
+[[0,0.0,0.0],1]
+normalize NormalizerYaMySQL "これはテスト" WITH_TYPES|WITH_CHECKS
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  {
+    "normalized": "これは ",
+    "types": [
+      "hiragana",
+      "hiragana",
+      "hiragana",
+      "null"
+    ],
+    "checks": [
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      9
+    ]
+  }
+]

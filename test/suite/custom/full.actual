@@ -1,13 +1,15 @@
 register normalizers/yamysql
 [[0,0.0,0.0],true]
-table_create @yamysql_stopwords TABLE_HASH_KEY ShortText
+table_create remove_phrases TABLE_PAT_KEY ShortText
 [[0,0.0,0.0],true]
-load --table @yamysql_stopwords
+load --table remove_phrases
 [
+{"_key": "<remove_symbol>"},
+{"_key": "<remove_html>"},
 {"_key": "テスト"}
 ]
-[[0,0.0,0.0],1]
-normalize NormalizerYaMySQL "これはテストです。" WITH_TYPES|WITH_CHECKS
+[[0,0.0,0.0],3]
+normalize NormalizerYaMySQL "**これは<b>テスト</b>です。" WITH_TYPES|WITH_CHECKS
 [
   [
     0,
@@ -15,17 +17,19 @@ normalize NormalizerYaMySQL "これはテストです。" WITH_TYPES|WITH_CHECKS
     0.0
   ],
   {
-    "normalized": "これは です。",
+    "normalized": " これは です ",
     "types": [
+      "null",
       "hiragana",
       "hiragana",
       "hiragana",
       "null",
       "hiragana",
       "hiragana",
-      "symbol"
+      "null"
     ],
     "checks": [
+      2,
       3,
       0,
       0,
@@ -35,16 +39,14 @@ normalize NormalizerYaMySQL "これはテストです。" WITH_TYPES|WITH_CHECKS
       3,
       0,
       0,
-      9,
+      16,
       3,
       0,
       0,
       3,
       0,
       0,
-      3,
-      0,
-      0
+      3
     ]
   }
 ]

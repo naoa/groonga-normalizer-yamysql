@@ -8,7 +8,7 @@ normalize NormalizerYaMySQL "aﾞあﾞz" WITH_CHECKS|WITH_TYPES
     0.0
   ],
   {
-    "normalized": "AあZ",
+    "normalized": "aあz",
     "types": [
       "alpha",
       "hiragana",

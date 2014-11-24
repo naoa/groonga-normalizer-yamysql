@@ -1,0 +1,10 @@
+register normalizers/yamysql
+
+table_create remove_phrases TABLE_PAT_KEY ShortText
+load --table remove_phrases
+[
+{"_key": "テスト"}
+]
+
+normalize NormalizerYaMySQL "これはテスト" WITH_TYPES|WITH_CHECKS
+

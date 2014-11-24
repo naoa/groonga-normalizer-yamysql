@@ -1,4 +1,10 @@
 register normalizers/yamysql
 
-normalize NormalizerYaMySQLSymbol "<p>これは<b>テスト</b>です。</p>" WITH_TYPES|WITH_CHECKS
+table_create remove_phrases TABLE_PAT_KEY ShortText
+load --table remove_phrases
+[
+{"_key": "<remove_symbol>"}
+]
+
+normalize NormalizerYaMySQL "<p>これは<b>テスト</b>です。</p>" WITH_TYPES|WITH_CHECKS
 

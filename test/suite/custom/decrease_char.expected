@@ -1,6 +1,6 @@
 register normalizers/yamysql
 [[0,0.0,0.0],true]
-normalize NormalizerYaMySQLSymbolPartofspeechHtml "ヴァイオリンの演奏" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL "ヴァイオリンの演奏" WITH_TYPES|WITH_CHECKS
 [
   [
     0,
@@ -8,14 +8,14 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml "ヴァイオリンの演奏" 
     0.0
   ],
   {
-    "normalized": "バイオリン 演奏",
+    "normalized": "バイオリンの演奏",
     "types": [
       "katakana",
       "katakana",
       "katakana",
       "katakana",
       "katakana",
-      "null",
+      "hiragana",
       "kanji",
       "kanji"
     ],
@@ -36,6 +36,8 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml "ヴァイオリンの演奏" 
       0,
       0,
       3,
+      0,
+      0,
       3,
       0,
       0,
@@ -45,7 +47,7 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml "ヴァイオリンの演奏" 
     ]
   }
 ]
-normalize NormalizerYaMySQLSymbolPartofspeechHtml "ﾊﾞｲｵﾘﾝの演奏" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL "ﾊﾞｲｵﾘﾝの演奏" WITH_TYPES|WITH_CHECKS
 [
   [
     0,
@@ -53,14 +55,14 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml "ﾊﾞｲｵﾘﾝの演奏" 
     0.0
   ],
   {
-    "normalized": "バイオリン 演奏",
+    "normalized": "バイオリンの演奏",
     "types": [
       "katakana",
       "katakana",
       "katakana",
       "katakana",
       "katakana",
-      "null",
+      "hiragana",
       "kanji",
       "kanji"
     ],
@@ -81,6 +83,8 @@ normalize NormalizerYaMySQLSymbolPartofspeechHtml "ﾊﾞｲｵﾘﾝの演奏" 
       0,
       0,
       3,
+      0,
+      0,
       3,
       0,
       0,

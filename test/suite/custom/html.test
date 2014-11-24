@@ -1,4 +1,9 @@
 register normalizers/yamysql
 
-normalize NormalizerYaMySQLHtml "<p>これは<b>テスト</b>です。</p>" WITH_TYPES|WITH_CHECKS
+table_create remove_phrases TABLE_PAT_KEY ShortText
+load --table remove_phrases
+[
+{"_key": "<remove_html>"}
+]
+normalize NormalizerYaMySQL "<p>これは<b>テスト</b>です。</p>" WITH_TYPES|WITH_CHECKS
 
