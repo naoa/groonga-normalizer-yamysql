@@ -1,0 +1,10 @@
+register normalizers/yamysql
+
+table_create remove_phrases TABLE_PAT_KEY ShortText
+load --table remove_phrases
+[
+{"_key": "<remove_symbol>"}
+]
+
+normalize NormalizerYaMySQL "ヴァ(米" REMOVE_BLANK|WITH_TYPES|WITH_CHECKS
+

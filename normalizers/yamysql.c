@@ -445,7 +445,11 @@ normalize(grn_ctx *ctx, grn_obj *string,
       }
       is_removed = GRN_FALSE;
     }
-    current_remove_checks++;
+    if (character_length == 6) {
+      current_remove_checks += 2;
+    } else {
+      current_remove_checks++;
+    }
     rest += character_length;
     rest_length -= character_length;
   }
