@@ -15,25 +15,20 @@ normalize NormalizerYaMySQL "<p>これは<b>テスト</b>です。</p>" WITH_TYP
     0.0
   ],
   {
-    "normalized": " これは テスト です。 ",
+    "normalized": "これはテストです。",
     "types": [
-      "null",
       "hiragana",
       "hiragana",
       "hiragana",
-      "null",
       "katakana",
       "katakana",
       "katakana",
-      "null",
       "hiragana",
       "hiragana",
-      "symbol",
-      "null"
+      "symbol"
     ],
     "checks": [
-      3,
-      3,
+      6,
       0,
       0,
       3,
@@ -42,8 +37,7 @@ normalize NormalizerYaMySQL "<p>これは<b>テスト</b>です。</p>" WITH_TYP
       3,
       0,
       0,
-      3,
-      3,
+      6,
       0,
       0,
       3,
@@ -52,8 +46,7 @@ normalize NormalizerYaMySQL "<p>これは<b>テスト</b>です。</p>" WITH_TYP
       3,
       0,
       0,
-      4,
-      3,
+      7,
       0,
       0,
       3,
@@ -61,8 +54,7 @@ normalize NormalizerYaMySQL "<p>これは<b>テスト</b>です。</p>" WITH_TYP
       0,
       3,
       0,
-      0,
-      4
+      0
     ]
   }
 ]

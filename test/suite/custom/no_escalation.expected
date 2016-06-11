@@ -21,23 +21,23 @@ tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode ADD
   [
     {
       "value": "時代",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
-      "value": "代 ",
-      "position": 1
-    },
-    {
-      "value": " 歌",
-      "position": 2
+      "value": "代歌",
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "歌人",
-      "position": 3
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "人",
-      "position": 4
+      "position": 3,
+      "force_prefix": false
     }
   ]
 ]
@@ -51,19 +51,18 @@ tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode GET
   [
     {
       "value": "時代",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
-      "value": "代 ",
-      "position": 1
-    },
-    {
-      "value": " 歌",
-      "position": 2
+      "value": "代歌",
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "歌人",
-      "position": 3
+      "position": 2,
+      "force_prefix": false
     }
   ]
 ]
@@ -75,11 +74,10 @@ normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
     0.0
   ],
   {
-    "normalized": "時代 歌人",
+    "normalized": "時代歌人",
     "types": [
       "kanji",
       "kanji",
-      "null",
       "kanji",
       "kanji"
     ],
@@ -90,8 +88,7 @@ normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
       3,
       0,
       0,
-      3,
-      3,
+      6,
       0,
       0,
       3,
@@ -103,12 +100,39 @@ normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
 load --table text
 [
 ["text"],
-["時代の歌人"]
+["時代の歌人"],
+["時代 歌人"],
+["時代歌人"]
 ]
-[[0,0.0,0.0],1]
+[[0,0.0,0.0],3]
 table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQL
 [[0,0.0,0.0],true]
 column_create text-text index COLUMN_INDEX|WITH_POSITION text text
 [[0,0.0,0.0],true]
-select text --match_columns text --query '時代の歌' --output_columns _key,title,text --limit 1 --match_escalation_threshold -1
-[[0,0.0,0.0],[[[1],[["text","LongText"]],["時代の歌人"]]]]
+select text --match_columns text --query '時代の歌' --output_columns _key,title,text --limit -1 --match_escalation_threshold -1
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    [
+      [
+        2
+      ],
+      [
+        [
+          "text",
+          "LongText"
+        ]
+      ],
+      [
+        "時代の歌人"
+      ],
+      [
+        "時代歌人"
+      ]
+    ]
+  ]
+]

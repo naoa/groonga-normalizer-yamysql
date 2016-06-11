@@ -17,11 +17,13 @@ normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
 load --table text
 [
 ["text"],
-["時代の歌人"]
+["時代の歌人"],
+["時代 歌人"],
+["時代歌人"]
 ]
 
 table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQL
 
 column_create text-text index COLUMN_INDEX|WITH_POSITION text text
 
-select text --match_columns text --query '時代の歌' --output_columns _key,title,text --limit 1 --match_escalation_threshold -1
+select text --match_columns text --query '時代の歌' --output_columns _key,title,text --limit -1 --match_escalation_threshold -1

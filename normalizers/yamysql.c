@@ -341,7 +341,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
   int flags;
   grn_bool remove_blank_p;
   unsigned int current_remove_checks = 0;
-  grn_bool is_removed = GRN_FALSE;
 
   encoding = grn_string_get_encoding(ctx, string);
   flags = grn_string_get_flags(ctx, string);
@@ -381,25 +380,9 @@ normalize(grn_ctx *ctx, grn_obj *string,
         current_check[0]++;
       }
     } else if (remove_checks && remove_checks[current_remove_checks]) {
-      if (!is_removed) {
-        normalized[normalized_length_in_bytes] = ' ';
-        normalized_length_in_bytes++;
-        normalized_n_characters++;
-        if (current_type) {
-          current_type[0] = GRN_CHAR_NULL;
-          current_type++;
-        }
-        if (current_check) {
-          current_check[0] += character_length;
-          current_check++;
-          current_check[0] = 0;
-        }
-      } else {
-        if (current_check) {
-          current_check[-1] += character_length;
-        }
+      if (current_check) {
+        current_check[0] += character_length;
       }
-      is_removed = GRN_TRUE;
     } else {
       grn_bool custom_normalized = GRN_FALSE;
       unsigned int normalized_character_length;
@@ -443,7 +426,6 @@ normalize(grn_ctx *ctx, grn_obj *string,
           current_check[0] = 0;
         }
       }
-      is_removed = GRN_FALSE;
     }
     if (character_length == 6) {
       current_remove_checks += 2;
@@ -807,9 +789,7 @@ mysql_unicode_ci_custom_next(
 
   flags = grn_string_get_flags(ctx, string);
 
-  //キー操作のWITH_NORMALIZEでノーマライザーが呼ばれた場合は、フィルター処理は動作しないようにする。
-  //TokenMecab、TokenDelimitではflagがなく区別できないため、フィルター処理は常に動作しない。
-  if (flags) {
+  {
     const char *original_string = NULL;
     unsigned int original_length_in_bytes = 0;
     unsigned int max_remove_checks_size = 0;

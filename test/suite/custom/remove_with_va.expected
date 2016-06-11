@@ -15,18 +15,16 @@ normalize NormalizerYaMySQL "ヴァ(米" REMOVE_BLANK|WITH_TYPES|WITH_CHECKS
     0.0
   ],
   {
-    "normalized": "バ 米",
+    "normalized": "バ米",
     "types": [
       "katakana",
-      "null",
       "kanji"
     ],
     "checks": [
       6,
       0,
       0,
-      1,
-      3,
+      4,
       0,
       0
     ]

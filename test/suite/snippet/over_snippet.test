@@ -1,5 +1,4 @@
 register normalizers/yamysql
-register functions/snippet_tritonn
 
 table_create remove_phrases TABLE_PAT_KEY ShortText
 load --table remove_phrases
@@ -7,7 +6,7 @@ load --table remove_phrases
 {"_key": "<remove_symbol>"}
 ]
 
-normalize NormalizerYaMySQL "データ+ベース" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQL "実践!!C++" WITH_TYPES|WITH_CHECKS
 
 table_create Entries TABLE_NO_KEY
 column_create Entries content COLUMN_SCALAR ShortText
@@ -17,14 +16,12 @@ column_create Tokens entries_content COLUMN_INDEX|WITH_POSITION Entries content
 
 load --table Entries
 [
-{"content": "データ+ベース"}
+{"content": "実践!!C++入門"}
 ]
 
 select Entries \
-  --output_columns 'snippet_tritonn(content, 200, 2, \
-  "NormalizerYaMySQL", \
-  1, 1, "...", "...", \
-  "データ-ベース",  "<span class=\\"w1\\">", "</span>"), content' \
+  --output_columns 'snippet(content, \
+  "C",  "<span class=\\"w1\\">", "</span>", {"normalizer": "NormalizerYaMySQL"}), content' \
   --command_version 2 \
   --match_columns 'content' \
-  --query "データ-ベース"
+  --query "C"

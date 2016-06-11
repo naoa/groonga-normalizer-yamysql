@@ -1,5 +1,4 @@
 register normalizers/yamysql
-register function/snippet_tritonn
 
 table_create Entries TABLE_NO_KEY
 column_create Entries title COLUMN_SCALAR ShortText
@@ -15,10 +14,8 @@ load --table Entries
 ]
 
 select Entries \
-  --output_columns 'title, snippet_tritonn(content, 200, 2, \
-  "NormalizerYaMySQL", \
-  1, 1, "...", "...", \
-  "aあﾞz", "<span class=\\"w1\\">", "</span>"), content' \
+  --output_columns 'title, snippet(content, \
+  "aあﾞz", "<span class=\\"w1\\">", "</span>", {"normalizer": "NormalizerYaMySQL"}), content' \
   --command_version 2 \
   --match_columns 'content' \
   --query "aあﾞz"
