@@ -15,7 +15,7 @@ normalize NormalizerYaMySQLRemovePhrase "<p>これは<b>テスト</b>です。</
     0.0
   ],
   {
-    "normalized": "pこれはbテストbですp",
+    "normalized": "PこれはBテストBですP",
     "types": [
       "alpha",
       "hiragana",

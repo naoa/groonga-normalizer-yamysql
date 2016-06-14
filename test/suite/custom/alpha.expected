@@ -8,7 +8,7 @@ normalize NormalizerYaMySQL "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY
     0.0
   ],
   {
-    "normalized": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+    "normalized": "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ",
     "types": [
 
     ],

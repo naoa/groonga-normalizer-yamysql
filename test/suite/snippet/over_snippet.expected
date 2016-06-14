@@ -15,7 +15,7 @@ normalize NormalizerYaMySQL "実践!!C++" WITH_TYPES|WITH_CHECKS
     0.0
   ],
   {
-    "normalized": "実践!!c++",
+    "normalized": "実践!!C++",
     "types": [
       "kanji",
       "kanji",

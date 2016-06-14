@@ -530,6 +530,8 @@ custom_normalizer(
   grn_bool is_vu = GRN_FALSE;
   uint32_t unichar;
 
+  //unichar = utf8_to_unichar(utf8, *character_length);
+  //GRN_LOG(ctx, GRN_LOG_WARNING, "char=%.*s unichar=%x", *character_length, normalized, unichar);
   if (*character_length != 3) {
     return GRN_FALSE;
   }
