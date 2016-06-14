@@ -6,5 +6,5 @@ load --table remove_phrases
 {"_key": "<remove_symbol>"}
 ]
 
-normalize NormalizerYaMySQL "ヴァ(米" REMOVE_BLANK|WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase "ヴァ(米" REMOVE_BLANK|WITH_TYPES|WITH_CHECKS
 

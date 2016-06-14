@@ -11,7 +11,7 @@ normalize NormalizerYaMySQL "実践!!C++" WITH_TYPES|WITH_CHECKS
 table_create Entries TABLE_NO_KEY
 column_create Entries content COLUMN_SCALAR ShortText
 
-table_create Tokens TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQL
+table_create Tokens TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLRemovePhrase
 column_create Tokens entries_content COLUMN_INDEX|WITH_POSITION Entries content
 
 load --table Entries
@@ -21,7 +21,7 @@ load --table Entries
 
 select Entries \
   --output_columns 'snippet(content, \
-  "C",  "<span class=\\"w1\\">", "</span>", {"normalizer": "NormalizerYaMySQL"}), content' \
+  "C",  "<span class=\\"w1\\">", "</span>", {"normalizer": "NormalizerYaMySQLRemovePhrase"}), content' \
   --command_version 2 \
   --match_columns 'content' \
   --query "C"

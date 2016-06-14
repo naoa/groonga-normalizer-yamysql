@@ -22,7 +22,7 @@ load --table text
 ["時代歌人"]
 ]
 
-table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQL
+table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLRemovePhrase
 
 column_create text-text index COLUMN_INDEX|WITH_POSITION text text
 

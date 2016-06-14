@@ -15,11 +15,15 @@ normalize NormalizerYaMySQL "実践!!C++" WITH_TYPES|WITH_CHECKS
     0.0
   ],
   {
-    "normalized": "実践c",
+    "normalized": "実践!!c++",
     "types": [
       "kanji",
       "kanji",
-      "alpha"
+      "symbol",
+      "symbol",
+      "alpha",
+      "symbol",
+      "symbol"
     ],
     "checks": [
       3,
@@ -28,7 +32,11 @@ normalize NormalizerYaMySQL "実践!!C++" WITH_TYPES|WITH_CHECKS
       3,
       0,
       0,
-      3
+      1,
+      1,
+      1,
+      1,
+      1
     ]
   }
 ]
@@ -36,7 +44,7 @@ table_create Entries TABLE_NO_KEY
 [[0,0.0,0.0],true]
 column_create Entries content COLUMN_SCALAR ShortText
 [[0,0.0,0.0],true]
-table_create Tokens TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQL
+table_create Tokens TABLE_PAT_KEY ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLRemovePhrase
 [[0,0.0,0.0],true]
 column_create Tokens entries_content COLUMN_INDEX|WITH_POSITION Entries content
 [[0,0.0,0.0],true]
@@ -45,7 +53,7 @@ load --table Entries
 {"content": "実践!!C++入門"}
 ]
 [[0,0.0,0.0],1]
-select Entries   --output_columns 'snippet(content,   "C",  "<span class=\\"w1\\">", "</span>", {"normalizer": "NormalizerYaMySQL"}), content'   --command_version 2   --match_columns 'content'   --query "C"
+select Entries   --output_columns 'snippet(content,   "C",  "<span class=\\"w1\\">", "</span>", {"normalizer": "NormalizerYaMySQLRemovePhrase"}), content'   --command_version 2   --match_columns 'content'   --query "C"
 [
   [
     0,

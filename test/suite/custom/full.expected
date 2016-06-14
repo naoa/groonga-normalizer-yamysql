@@ -9,7 +9,7 @@ load --table remove_phrases
 {"_key": "テスト"}
 ]
 [[0,0.0,0.0],3]
-normalize NormalizerYaMySQL "**これは<b>テスト</b>です。" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase "**これは<b>テスト</b>です。" WITH_TYPES|WITH_CHECKS
 [
   [
     0,

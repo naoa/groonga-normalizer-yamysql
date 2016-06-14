@@ -6,11 +6,11 @@ load --table remove_phrases
 {"_key": "の"}
 ]
 
-normalize NormalizerYaMySQL "クロアチア の戦争" WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQL " クロアチアの戦争" WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQL "クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQL "クロアチアののの戦争 " WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQL " クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQL " クロアチア の戦争 " WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQL " クロアチア の 戦争 " WITH_TYPES|WITH_CHECKS
-normalize NormalizerYaMySQL " クロアチア の戦争 " REMOVE_BLANK|WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase "クロアチア の戦争" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase " クロアチアの戦争" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase "クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase "クロアチアののの戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase " クロアチアの戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase " クロアチア の戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase " クロアチア の 戦争 " WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase " クロアチア の戦争 " REMOVE_BLANK|WITH_TYPES|WITH_CHECKS

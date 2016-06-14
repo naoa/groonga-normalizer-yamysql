@@ -25,18 +25,23 @@ tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode ADD
       "force_prefix": false
     },
     {
-      "value": "代歌",
+      "value": "代の",
       "position": 1,
       "force_prefix": false
     },
     {
-      "value": "歌人",
+      "value": "の歌",
       "position": 2,
       "force_prefix": false
     },
     {
-      "value": "人",
+      "value": "歌人",
       "position": 3,
+      "force_prefix": false
+    },
+    {
+      "value": "人",
+      "position": 4,
       "force_prefix": false
     }
   ]
@@ -55,13 +60,18 @@ tokenize TokenBigram "時代の歌人" NormalizerYaMySQL --mode GET
       "force_prefix": false
     },
     {
-      "value": "代歌",
+      "value": "代の",
       "position": 1,
       "force_prefix": false
     },
     {
-      "value": "歌人",
+      "value": "の歌",
       "position": 2,
+      "force_prefix": false
+    },
+    {
+      "value": "歌人",
+      "position": 3,
       "force_prefix": false
     }
   ]
@@ -74,10 +84,11 @@ normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
     0.0
   ],
   {
-    "normalized": "時代歌人",
+    "normalized": "時代の歌人",
     "types": [
       "kanji",
       "kanji",
+      "hiragana",
       "kanji",
       "kanji"
     ],
@@ -88,7 +99,10 @@ normalize NormalizerYaMySQL "時代の歌人" WITH_TYPES|WITH_CHECKS
       3,
       0,
       0,
-      6,
+      3,
+      0,
+      0,
+      3,
       0,
       0,
       3,
@@ -105,7 +119,7 @@ load --table text
 ["時代歌人"]
 ]
 [[0,0.0,0.0],3]
-table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQL
+table_create text-text TABLE_PAT_KEY --key_type ShortText --default_tokenizer TokenBigram --normalizer NormalizerYaMySQLRemovePhrase
 [[0,0.0,0.0],true]
 column_create text-text index COLUMN_INDEX|WITH_POSITION text text
 [[0,0.0,0.0],true]

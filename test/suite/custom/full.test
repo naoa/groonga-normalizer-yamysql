@@ -8,5 +8,5 @@ load --table remove_phrases
 {"_key": "テスト"}
 ]
 
-normalize NormalizerYaMySQL "**これは<b>テスト</b>です。" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase "**これは<b>テスト</b>です。" WITH_TYPES|WITH_CHECKS
 

@@ -766,7 +766,7 @@ mysql_unicode_ci_custom_next(
   GNUC_UNUSED int nargs,
   grn_obj **args,
   GNUC_UNUSED grn_user_data *user_data,
-  grn_bool kana_ci)
+  grn_bool kana_ci, grn_bool remove_phrase)
 {
   grn_obj *string = args[0];
   grn_encoding encoding;
@@ -789,7 +789,7 @@ mysql_unicode_ci_custom_next(
 
   flags = grn_string_get_flags(ctx, string);
 
-  {
+  if (remove_phrase) {
     const char *original_string = NULL;
     unsigned int original_length_in_bytes = 0;
     unsigned int max_remove_checks_size = 0;
@@ -859,7 +859,7 @@ mysql_unicode_ci_custom(
   grn_obj **args,
   GNUC_UNUSED grn_user_data *user_data)
 {
-  return mysql_unicode_ci_custom_next(ctx, nargs, args, user_data, GRN_FALSE);
+  return mysql_unicode_ci_custom_next(ctx, nargs, args, user_data, GRN_FALSE, GRN_FALSE);
 }
 
 static grn_obj *
@@ -869,7 +869,27 @@ mysql_unicode_ci_custom_kana_ci(
   grn_obj **args,
   GNUC_UNUSED grn_user_data *user_data)
 {
-  return mysql_unicode_ci_custom_next(ctx, nargs, args, user_data, GRN_TRUE);
+  return mysql_unicode_ci_custom_next(ctx, nargs, args, user_data, GRN_TRUE, GRN_FALSE);
+}
+
+static grn_obj *
+mysql_unicode_ci_custom_remove_phrase(
+  GNUC_UNUSED grn_ctx *ctx,
+  GNUC_UNUSED int nargs,
+  grn_obj **args,
+  GNUC_UNUSED grn_user_data *user_data)
+{
+  return mysql_unicode_ci_custom_next(ctx, nargs, args, user_data, GRN_FALSE, GRN_TRUE);
+}
+
+static grn_obj *
+mysql_unicode_ci_custom_kana_ci_remove_phrase(
+  GNUC_UNUSED grn_ctx *ctx,
+  GNUC_UNUSED int nargs,
+  grn_obj **args,
+  GNUC_UNUSED grn_user_data *user_data)
+{
+  return mysql_unicode_ci_custom_next(ctx, nargs, args, user_data, GRN_TRUE, GRN_TRUE);
 }
 
 grn_rc
@@ -883,9 +903,12 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
   grn_normalizer_register(ctx, "NormalizerYaMySQL", -1,
                           NULL, mysql_unicode_ci_custom, NULL);
-
   grn_normalizer_register(ctx, "NormalizerYaMySQLKanaCI", -1,
                           NULL, mysql_unicode_ci_custom_kana_ci, NULL);
+  grn_normalizer_register(ctx, "NormalizerYaMySQLRemovePhrase", -1,
+                          NULL, mysql_unicode_ci_custom_remove_phrase, NULL);
+  grn_normalizer_register(ctx, "NormalizerYaMySQLKanaCIRemovePhrase", -1,
+                          NULL, mysql_unicode_ci_custom_kana_ci_remove_phrase, NULL);
 
   return GRN_SUCCESS;
 }

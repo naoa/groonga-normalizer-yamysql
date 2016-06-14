@@ -6,7 +6,7 @@ load --table remove_phrases
 {"_key": "<remove_symbol>"}
 ]
 
-normalize NormalizerYaMySQL "データ+ベース" WITH_TYPES|WITH_CHECKS
+normalize NormalizerYaMySQLRemovePhrase "データ+ベース" WITH_TYPES|WITH_CHECKS
 
 table_create Entries TABLE_NO_KEY
 column_create Entries content COLUMN_SCALAR ShortText
@@ -21,7 +21,7 @@ load --table Entries
 
 select Entries \
   --output_columns 'snippet(content, \
-  "データ-ベース",  "<span class=\\"w1\\">", "</span>", {"normalizer": "NormalizerYaMySQL"}), content' \
+  "データ-ベース",  "<span class=\\"w1\\">", "</span>", {"normalizer": "NormalizerYaMySQLRemovePhrase"}), content' \
   --command_version 2 \
   --match_columns 'content' \
   --query "データ-ベース"
