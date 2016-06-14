@@ -676,7 +676,7 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
   unsigned int rest_length = string_length;
   grn_bool in_tag = GRN_FALSE;
   const char *string_end = string + string_length;
-  const char *scan_start;
+  const char *scan_start = string;
   const char *scan_rest = string;
   unsigned int nhits = 0;
   unsigned int current_hit = 0;
@@ -771,7 +771,6 @@ mysql_unicode_ci_custom_next(
   grn_obj *string = args[0];
   grn_encoding encoding;
   const char *normalizer_type_label = "yamysql";
-  int flags;
   grn_obj *table = NULL;
   grn_pat_scan_hit *hits = NULL;
   grn_bool *remove_checks = NULL;
@@ -786,8 +785,6 @@ mysql_unicode_ci_custom_next(
                      grn_encoding_to_string(encoding));
     return NULL;
   }
-
-  flags = grn_string_get_flags(ctx, string);
 
   if (remove_phrase) {
     const char *original_string = NULL;
