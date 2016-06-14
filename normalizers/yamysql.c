@@ -774,6 +774,7 @@ mysql_unicode_ci_custom_next(
   grn_obj *table = NULL;
   grn_pat_scan_hit *hits = NULL;
   grn_bool *remove_checks = NULL;
+  int flags;
 
   encoding = grn_string_get_encoding(ctx, string);
   if (encoding != GRN_ENC_UTF8) {
@@ -785,8 +786,10 @@ mysql_unicode_ci_custom_next(
                      grn_encoding_to_string(encoding));
     return NULL;
   }
+  flags = grn_string_get_flags(ctx, string);
 
-  if (remove_phrase) {
+  /* can't support don't have any flags tokenizers such as TokenMecab etc.. */
+  if (flags && remove_phrase) {
     const char *original_string = NULL;
     unsigned int original_length_in_bytes = 0;
     unsigned int max_remove_checks_size = 0;

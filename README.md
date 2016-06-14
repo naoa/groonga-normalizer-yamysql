@@ -127,6 +127,8 @@ normalize NormalizerYaMySQL "おっづ"
 
 ノーマライザーでのフィルター機能は、トークナイザーでフィルターするのに比べ処理負荷が大きくなりますが、検索時とスニペット時で検索ワードが異なることがなく、適切なスニペットを行うことができます。  
 
+この機能は``TokenMecab``や``TokenDelimit``では正常に動作しない。
+
 ### Source install
 
 Build this normalizer.
