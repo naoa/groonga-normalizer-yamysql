@@ -1,4 +1,4 @@
 register normalizers/yamysql
 [[0,0.0,0.0],true]
 normalize NormalizerYaMySQL "ヴァヴィヴヴェヴォ"
-[[0,0.0,0.0],{"normalized":"バビブベボ","types":[],"checks":[]}]
+[[0,0.0,0.0],{"normalized":"バビヴベボ","types":[],"checks":[]}]

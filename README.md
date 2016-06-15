@@ -77,28 +77,11 @@ normalize NormalizerYaMySQL "デ―タベ‐ス"
 
 * 以下のカタカナの異体字を正規化します。
 
-ヂ/ジ ヅ/ズ  
 ヴァ/バ ヴィ/ビ ヴェ/ベ ヴォ/ボ  
-ヴ/ブ  
-ヱ/エ  
-ヰ/イ
 
 ```
 normalize NormalizerYaMySQL "ヴァイオリン"
 [[0,0.0,0.0],{"normalized":"バイオリン","types":[],"checks":[]}]
-```
-
-### ``VariantHiragana``
-
-* 以下のひらがなの異体字を正規化します。
-
-ぢ/じ づ/ず  
-ゑ/え  
-ゐ/い
-
-```
-normalize NormalizerYaMySQL "おっづ"
-[[0,0.0,0.0],{"normalized":"おっず","types":[],"checks":[]}]
 ```
 
 ### ``RemovePhrase``
