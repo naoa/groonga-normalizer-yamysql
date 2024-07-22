@@ -1,0 +1,8 @@
+register normalizers/yamysql
+
+table_create remove_phrases TABLE_PAT_KEY ShortText
+load --table remove_phrases
+[
+{"_key": "<remove_html>"}
+]
+normalize NormalizerYaMySQLRemovePhrase "<p>これは<b<a>テスト<b>です。</p>これは>片側<テストです。" WITH_TYPES|WITH_CHECKS

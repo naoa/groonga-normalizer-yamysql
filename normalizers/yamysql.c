@@ -684,6 +684,8 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
   grn_bool in_phrase = GRN_FALSE;
   grn_bool remove_symbol = GRN_FALSE;
   grn_bool remove_html = GRN_FALSE;
+  const char *tag_start = NULL;
+  unsigned int tag_start_char = 0;
 
   {
     grn_id id;
@@ -709,7 +711,7 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
         nhits = grn_pat_scan(ctx, (grn_pat *)table,
                              scan_rest,
                              scan_rest_length,
-                             hits, MAX_N_HITS, &scan_rest); 
+                             hits, MAX_N_HITS, &scan_rest);
         current_hit = 0;
       }
     }
@@ -730,11 +732,24 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
       switch (string[0]) {
         case '<' :
           in_tag = GRN_TRUE;
-          is_removed = GRN_TRUE;
+          tag_start = string;
+          tag_start_char = current_char;
           break;
         case '>' :
-          in_tag = GRN_FALSE;
-          is_removed = GRN_TRUE;
+          if (in_tag) {
+            in_tag = GRN_FALSE;
+            is_removed = GRN_TRUE;
+            // Mark all characters from tag_start to current position as removed
+            const char *p = tag_start;
+            unsigned int char_index = tag_start_char;
+            while (p <= string) {
+               unsigned int p_length = grn_plugin_charlen(ctx, p, string_end - p, encoding);
+               remove_checks[char_index] = GRN_TRUE;
+               p += p_length;
+               char_index++;
+            }
+            tag_start = NULL;
+          }
           break;
         default :
           break;
@@ -746,7 +761,8 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
       }
     }
     if (remove_html && in_tag) {
-      remove_checks[current_char] = in_tag;
+      // Don't mark as removed yet, wait for closing tag
+      remove_checks[current_char] = GRN_FALSE;
     } else if (table && in_phrase) {
       remove_checks[current_char] = in_phrase;
     } else {
@@ -755,6 +771,19 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
     current_char++;
     string += char_length;
     rest_length -= char_length;
+  }
+
+  // If we're still in a tag at the end, it means there was no closing tag
+  // So we should not remove these characters
+  if (in_tag && tag_start) {
+    const char *p = tag_start;
+    unsigned int char_index = tag_start_char;
+    while (p < string_end) {
+      unsigned int p_length = grn_plugin_charlen(ctx, p, string_end - p, encoding);
+      remove_checks[char_index] = GRN_FALSE;
+      p += p_length;
+      char_index++;
+    }
   }
 
   return current_char;
@@ -795,7 +824,7 @@ mysql_unicode_ci_custom_next(
     unsigned int max_remove_checks_size = 0;
     const char *table_name_env;
     table_name_env = getenv("GRN_REMOVE_PHRASE_TABLE_NAME");
-    
+
     if (table_name_env) {
       table = grn_ctx_get(ctx,
                           table_name_env,
