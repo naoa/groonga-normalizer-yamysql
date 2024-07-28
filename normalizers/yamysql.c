@@ -669,6 +669,7 @@ custom_normalizer(
 static unsigned int
 char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
             grn_encoding encoding, grn_bool *remove_checks,
+            unsigned int remove_checks_length,
             grn_obj *table, grn_pat_scan_hit *hits)
 {
   unsigned int char_length;
@@ -742,11 +743,11 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
             // Mark all characters from tag_start to current position as removed
             const char *p = tag_start;
             unsigned int char_index = tag_start_char;
-            while (p <= string) {
-               unsigned int p_length = grn_plugin_charlen(ctx, p, string_end - p, encoding);
-               remove_checks[char_index] = GRN_TRUE;
-               p += p_length;
-               char_index++;
+            while (p < string && char_index < remove_checks_length) {
+              unsigned int p_length = grn_plugin_charlen(ctx, p, string_end - p, encoding);
+              remove_checks[char_index] = GRN_TRUE;
+              p += p_length;
+              char_index++;
             }
             tag_start = NULL;
           }
@@ -773,12 +774,11 @@ char_filter(grn_ctx *ctx, const char *string, unsigned int string_length,
     rest_length -= char_length;
   }
 
-  // If we're still in a tag at the end, it means there was no closing tag
-  // So we should not remove these characters
+  // 終了タグがない場合の処理の修正
   if (in_tag && tag_start) {
     const char *p = tag_start;
     unsigned int char_index = tag_start_char;
-    while (p < string_end) {
+    while (p < string_end && char_index < remove_checks_length) {
       unsigned int p_length = grn_plugin_charlen(ctx, p, string_end - p, encoding);
       remove_checks[char_index] = GRN_FALSE;
       p += p_length;
@@ -852,6 +852,7 @@ mysql_unicode_ci_custom_next(
       remove_checks = GRN_PLUGIN_MALLOC(ctx, max_remove_checks_size);
 
       char_filter(ctx, original_string, original_length_in_bytes, encoding, remove_checks,
+                  original_length_in_bytes + 1,
                   table, hits);
     }
   }
